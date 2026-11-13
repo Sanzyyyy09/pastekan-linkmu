@@ -1,0 +1,1618 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070B1A">
+<title>Pastekan Linkmu</title>
+<meta name="description" content="Simpan dan bagikan teks atau daftar link lewat satu alamat pendek. Gratis, bisa dikunci sandi, dengan masa berlaku dan statistik kunjungan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: header menempel di atas (menu hamburger di HP), halaman beranda satu kolom lebar (hero, form + rak daftar, cara kerja, fitur, FAQ, ajakan), halaman panel (Dashboard, Kelola) berupa kartu bertumpuk.
+   Warna: gelap-dulu, biru malam dengan aksen indigo ke ungu; hijau, kuning, merah hanya untuk status. Enam warna fitur untuk ikon. */
+:root{
+  --bg:#070B1A; --glow1:rgba(99,102,241,.24); --glow2:rgba(168,85,247,.16);
+  --surface:#0D1330; --surface2:#141C40; --field:#090E27; --ink:#EEF1FF; --muted:#9AA5CD; --line:#1F2A55;
+  --accent:#8B93FF; --accent2:#B28CFF; --accent-soft:rgba(139,147,255,.16);
+  --grad:linear-gradient(135deg,#5B5FEF,#8B5CF6); --grad-ink:#FFFFFF;
+  --ok:#4ADE80; --ok-soft:rgba(74,222,128,.14); --warn:#FBBF24; --warn-soft:rgba(251,191,36,.14); --bad:#FB7185; --bad-soft:rgba(251,113,133,.15);
+  --hl:#FDE68A; --hl-ink:#2A2100;
+  --ci1:#8B93FF; --ci2:#FB923C; --ci3:#F472B6; --ci4:#34D399; --ci5:#38BDF8; --ci6:#B28CFF;
+  --shadow:0 24px 54px -28px rgba(0,0,0,.8);
+  --f-body:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#F3F4FF; --glow1:rgba(99,102,241,.16); --glow2:rgba(168,85,247,.10);
+    --surface:#FFFFFF; --surface2:#EDEFFF; --field:#F6F7FF; --ink:#12163A; --muted:#566090; --line:#DADEF5;
+    --accent:#4F46E5; --accent2:#7C3AED; --accent-soft:rgba(79,70,229,.10);
+    --ok:#15803D; --ok-soft:rgba(21,128,61,.11); --warn:#A15C07; --warn-soft:rgba(161,92,7,.12); --bad:#BE2A46; --bad-soft:rgba(190,42,70,.10);
+    --hl:#FDE047;
+    --ci1:#4F46E5; --ci2:#C2570C; --ci3:#BE1F6E; --ci4:#047857; --ci5:#0369A1; --ci6:#7C3AED;
+    --shadow:0 20px 44px -26px rgba(40,50,140,.35); color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F3F4FF; --glow1:rgba(99,102,241,.16); --glow2:rgba(168,85,247,.10);
+  --surface:#FFFFFF; --surface2:#EDEFFF; --field:#F6F7FF; --ink:#12163A; --muted:#566090; --line:#DADEF5;
+  --accent:#4F46E5; --accent2:#7C3AED; --accent-soft:rgba(79,70,229,.10);
+  --ok:#15803D; --ok-soft:rgba(21,128,61,.11); --warn:#A15C07; --warn-soft:rgba(161,92,7,.12); --bad:#BE2A46; --bad-soft:rgba(190,42,70,.10);
+  --hl:#FDE047;
+  --ci1:#4F46E5; --ci2:#C2570C; --ci3:#BE1F6E; --ci4:#047857; --ci5:#0369A1; --ci6:#7C3AED;
+  --shadow:0 20px 44px -26px rgba(40,50,140,.35); color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(800px 480px at 8% -6%,var(--glow1),transparent 70%),radial-gradient(700px 460px at 100% 4%,var(--glow2),transparent 70%);
+  background-repeat:no-repeat;
+  color:var(--ink); font-family:var(--f-body); font-size:15px; line-height:1.55;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:50}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.g{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.w{max-width:1120px;margin:0 auto}
+.mono{font-family:var(--f-mono)}
+.gt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+
+/* header */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr-in{display:flex;align-items:center;justify-content:space-between;gap:12px;height:68px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.mark{width:42px;height:42px;border-radius:13px;background:var(--grad);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 10px 22px -8px #6366F1}
+.wm{font-weight:800;font-size:19px;letter-spacing:-.02em;line-height:1.1;display:block}
+.wm b{color:var(--accent);font-weight:800}
+.tg{display:block;font-size:11.5px;color:var(--muted);line-height:1.25}
+.nav{display:flex;align-items:center;gap:2px}
+.nav a,.nav button.nl{padding:8px 13px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:none;border:0;background:none;cursor:pointer}
+.nav a:hover,.nav button.nl:hover{color:var(--ink);background:var(--surface2)}
+.nav a[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
+.hr{display:flex;align-items:center;gap:8px}
+.icon-btn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;flex:none}
+.icon-btn:hover{background:var(--surface2)}
+.only-m{display:none}
+.mpanel{display:none}
+@media (max-width:900px){
+  .nav,.hr .dsk{display:none}
+  .only-m{display:inline-grid}
+  .mpanel.on{display:block;position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));top:76px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow);z-index:45}
+}
+.mpanel a{display:flex;align-items:center;gap:14px;padding:13px 12px;border-radius:12px;font-weight:600;text-decoration:none}
+.mpanel a:hover,.mpanel a[aria-current="page"]{background:var(--accent-soft)}
+.mpanel a svg{color:var(--accent)}
+.mpanel .mb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* tombol */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .12s,background .12s,border-color .12s,filter .12s}
+.btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn.primary{background:var(--grad);border-color:transparent;color:var(--grad-ink);box-shadow:0 14px 28px -12px #6366F1}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.light{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn.light:hover{filter:brightness(.94)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.btn.danger:hover{border-color:var(--bad)}
+.btn.lg{padding:14px 24px;font-size:15px;border-radius:14px}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.actions.center{justify-content:center}
+
+/* chip */
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.info{background:var(--accent-soft);color:var(--accent)}
+.chip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+
+/* halaman */
+main.g{padding-block:26px 8px}
+.hero{text-align:center;max-width:780px;margin:18px auto 34px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.hero h1{font-weight:800;font-size:clamp(32px,6.4vw,58px);line-height:1.06;letter-spacing:-.035em;margin:0;text-wrap:balance}
+.hero p{margin:0;color:var(--muted);font-size:clamp(15px,2.4vw,18px);max-width:60ch}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;margin-top:10px}
+@media (max-width:560px){.trio{gap:8px}}
+.tri{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 10px;text-align:center}
+.tri b{display:block;font-size:clamp(17px,3.6vw,22px);font-weight:800;letter-spacing:-.02em}
+.tri span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
+.card{--cp:26px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:var(--cp);box-shadow:var(--shadow);min-width:0}
+@media (max-width:480px){.card{--cp:18px;border-radius:20px}}
+.card h2{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:700;letter-spacing:-.015em;margin:0 0 16px}
+.hbadge{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--grad);color:#fff;flex:none}
+.stack{display:flex;flex-direction:column;gap:18px}
+.sec{margin-top:64px;scroll-margin-top:84px}
+.sec-h{text-align:center;max-width:640px;margin:0 auto 28px}
+.sec-h h2{font-size:clamp(25px,4.4vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.12;margin:10px 0 8px;text-wrap:balance}
+.sec-h p{margin:0;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.steps{grid-template-columns:minmax(0,1fr)}}
+.tile{--c:var(--ci1);background:color-mix(in srgb,var(--c) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 28%,var(--line));border-radius:22px;padding:22px;position:relative;min-width:0}
+.tile .ti{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c);margin-bottom:14px}
+.tile h3{font-size:17px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+.tile p{margin:0;color:var(--muted);font-size:14px}
+.tile .no{position:absolute;right:20px;top:16px;font-size:28px;font-weight:800;color:color-mix(in srgb,var(--c) 55%,transparent);font-variant-numeric:tabular-nums}
+.fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.fgrid{grid-template-columns:minmax(0,1fr)}}
+.faq{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:0 18px}
+.faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;font-weight:700}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary svg{flex:none;color:var(--accent);transition:transform .15s}
+.faq details[open] summary svg{transform:rotate(180deg)}
+.faq details p{margin:0 0 16px;color:var(--muted)}
+.cta{margin-top:64px;border-radius:28px;padding:clamp(26px,5vw,48px);background:var(--grad);color:#fff;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;overflow:hidden;box-shadow:0 30px 60px -30px #5B5FEF}
+.cta::after{content:"";position:absolute;width:320px;height:320px;right:-80px;top:-140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%);pointer-events:none}
+.cta>*{position:relative;z-index:1}
+.cta h2{margin:0;font-size:clamp(24px,4.4vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.12;text-wrap:balance}
+.cta p{margin:0;opacity:.92;max-width:56ch}
+.cta .btn.light{background:#fff;color:#1B1D55;border-color:#fff}
+
+/* form */
+label,.lab{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+.inp{width:100%;background:var(--field);border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;min-width:0;transition:border-color .12s,box-shadow .12s}
+.inp:hover{border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.inp:disabled{opacity:.6}
+.inp::placeholder{color:color-mix(in srgb,var(--muted) 80%,transparent)}
+textarea.inp{font-family:var(--f-mono);font-size:13.5px;line-height:1.6;min-height:220px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.row2{grid-template-columns:minmax(0,1fr)}}
+.slugbox{display:flex;align-items:stretch}
+.slugbox span{display:grid;place-items:center;padding:0 14px;background:var(--grad);border-radius:12px 0 0 12px;font-family:var(--f-mono);color:#fff;font-weight:600}
+.slugbox .inp{border-radius:0 12px 12px 0;font-family:var(--f-mono);font-size:14px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}
+.hint.ok{color:var(--ok)} .hint.bad{color:var(--bad)}
+.check{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:500;margin:0;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.seg{display:inline-flex;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:4px;gap:2px}
+.seg button{border:0;background:transparent;padding:8px 16px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-checked="true"],.seg button[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:0 8px 16px -8px #6366F1}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;padding:11px 13px;border-radius:14px;border:1.5px solid var(--line);background:var(--field);cursor:pointer;min-width:0}
+.opt:hover{border-color:var(--accent)}
+.opt svg{color:var(--muted);flex:none}
+.opt b{display:block;font-size:13.5px;font-weight:700}
+.opt small{display:block;font-size:11.5px;color:var(--muted);line-height:1.3}
+.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-checked="true"] svg{color:var(--accent)}
+.bodyhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.bodyfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:12.5px;color:var(--muted)}
+.err{color:var(--bad);font-size:13.5px;min-height:20px}
+.notice{background:var(--accent-soft);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:13.5px}
+.notice.warn{background:var(--warn-soft)} .notice.good{background:var(--ok-soft)}
+
+/* rak daftar */
+.tabs{display:flex;gap:6px;margin:16px 0 12px;flex-wrap:wrap}
+.tabs button{border:0;background:var(--surface2);padding:8px 16px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--grad);color:#fff}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--field);border-radius:16px;padding:11px 13px;cursor:pointer}
+.item:hover{border-color:var(--accent)}
+.item .ib{min-width:0;flex:1}
+.item .t{font-weight:600;overflow-wrap:anywhere}
+.item .s{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;color:var(--muted);margin-top:3px;align-items:center}
+.empty{color:var(--muted);font-size:14px;padding:18px;background:var(--field);border:1px dashed var(--line);border-radius:14px;text-align:center}
+.openbox{display:flex;gap:10px}
+.fav{width:40px;height:40px;flex:none;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:17px;background:hsl(var(--h,230) 62% 46%);color:#fff}
+
+/* panel (dashboard / kelola) */
+.phead{margin-bottom:22px;display:flex;flex-direction:column;gap:8px}
+.crumb{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.phead h1{margin:0;font-size:clamp(28px,5vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.phead p{margin:0;color:var(--muted);max-width:62ch}
+.phead .actions{margin-top:6px}
+.dash{display:flex;flex-direction:column;gap:18px}
+.hello{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.avatar{width:52px;height:52px;border-radius:16px;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;flex:none}
+.hello .tx{flex:1;min-width:180px}
+.hello h2{margin:0 0 2px;font-size:19px}
+.hello p{margin:0;font-size:13px;color:var(--muted)}
+.kpi{position:relative;overflow:hidden}
+.kpi .kl{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--c,var(--ci4))}
+.kpi .kv{display:flex;align-items:baseline;gap:10px;margin:8px 0 6px;flex-wrap:wrap}
+.kpi .kv b{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .ks{font-size:13px;color:var(--muted)}
+.kpi .kic{position:absolute;right:20px;top:20px;color:color-mix(in srgb,var(--c,var(--ci4)) 50%,transparent)}
+.kgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:900px){.kgrid{grid-template-columns:minmax(0,1fr)}}
+.chart{width:100%;height:auto;display:block}
+.chart .gl{stroke:var(--line);stroke-dasharray:3 4;fill:none}
+.chart .ax{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.chart .bar{fill:var(--accent)} .chart .bar.today{fill:var(--accent2)}
+.chart .bv{fill:var(--ink);font-size:11px;font-weight:700;font-family:var(--f-body)}
+.rank{display:flex;flex-direction:column;gap:10px}
+.rrow{display:flex;align-items:center;gap:12px;background:var(--field);border:1px solid var(--line);border-radius:16px;padding:12px 13px}
+.rno{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;background:var(--surface2);color:var(--muted)}
+.rrow:nth-child(1) .rno{background:var(--warn-soft);color:var(--warn)}
+.rrow:nth-child(2) .rno{background:var(--accent-soft);color:var(--accent)}
+.rrow:nth-child(3) .rno{background:var(--bad-soft);color:var(--bad)}
+.rrow .rb{flex:1;min-width:0}
+.rrow .rt{font-weight:700;overflow-wrap:anywhere}
+.rrow .rs{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:4px}
+.rrow .ra{display:flex;gap:6px;flex:none}
+@media (max-width:560px){.rrow{flex-wrap:wrap}.rrow .ra{width:100%;justify-content:flex-end}}
+.live{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:8px}
+.feed{display:flex;flex-direction:column}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.frow .fl{min-width:0}
+.frow b{display:block;overflow-wrap:anywhere;font-weight:600}
+.frow span{font-size:12.5px;color:var(--muted)}
+.frow .fr{text-align:right;flex:none;font-size:12.5px;color:var(--muted)}
+.inv{background:linear-gradient(135deg,color-mix(in srgb,var(--ci1) 18%,var(--surface)),color-mix(in srgb,var(--ci6) 12%,var(--surface)))}
+.inv h2{display:block;margin:10px 0 8px;font-size:22px;letter-spacing:-.02em}
+.inv p{margin:0 0 16px;color:var(--muted)}
+.mrow{display:flex;align-items:center;gap:12px;background:var(--field);border:1px solid var(--line);border-radius:16px;padding:12px 13px;flex-wrap:wrap}
+.mrow .rb{flex:1;min-width:200px}
+.mtools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.mtools .inp{flex:1 1 220px}
+
+/* lihat paste */
+.back{margin-bottom:16px}
+.vcard{padding:0;overflow:hidden}
+.vband{padding:var(--cp);background:linear-gradient(135deg,color-mix(in srgb,var(--ci1) 26%,var(--surface)),color-mix(in srgb,var(--ci6) 16%,var(--surface)));border-bottom:1px solid var(--line)}
+.vbody{padding:var(--cp)}
+.vhead h1{font-weight:800;font-size:clamp(24px,4.6vw,34px);letter-spacing:-.03em;line-height:1.12;margin:0 0 14px;overflow-wrap:anywhere;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.shortbox{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.shortbox .inp{flex:1 1 220px;font-family:var(--f-mono);font-size:13.5px}
+.sharebar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.sep{height:1px;background:var(--line);margin:20px 0}
+.links{display:flex;flex-direction:column;gap:10px}
+.lrow{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:16px;background:var(--field);overflow:hidden}
+.lrow:hover{border-color:var(--accent)}
+.lrow .go{flex:1;min-width:0;display:flex;align-items:center;gap:13px;padding:12px 14px;text-decoration:none}
+.lrow .tx{min-width:0;flex:1}
+.lrow .lbl{display:block;font-weight:600;overflow-wrap:anywhere}
+.lrow .url{display:block;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .url b{font-weight:500;color:var(--ink)}
+.lrow .go:hover .url b{background:var(--hl);color:var(--hl-ink)}
+.lrow .go>svg{color:var(--accent);flex:none}
+.lrow .cp{border:0;border-left:1px solid var(--line);background:var(--surface2);width:50px;cursor:pointer;display:grid;place-items:center;color:var(--muted)}
+.lrow .cp:hover{color:var(--accent)}
+.sect{font-size:15px;font-weight:700;margin:12px 0 0;color:var(--accent)}
+.textbody,.raw{font-family:var(--f-mono);font-size:13.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:0}
+.textbody a{text-decoration:underline;text-decoration-color:var(--hl);text-decoration-thickness:3px;text-underline-offset:2px}
+.lockbox{max-width:420px}
+.authbox{max-width:460px;margin:8px auto 0}
+.authbox h1{font-weight:800;font-size:27px;letter-spacing:-.03em;line-height:1.12;margin:0 0 6px}
+.authart{display:grid;place-items:center;width:56px;height:56px;border-radius:18px;background:var(--grad);color:#fff;margin-bottom:14px;box-shadow:0 14px 28px -12px #6366F1}
+.prose{max-width:720px}
+.prose h2{font-size:17px;margin:22px 0 8px}
+.prose p,.prose li{color:var(--muted)}
+.prose ul{padding-left:20px;margin:0}
+
+/* footer */
+.ftr{margin-top:72px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface) 55%,var(--bg))}
+.ftr-in{padding-block:40px 36px}
+.fcols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px}
+@media (max-width:760px){.fcols{grid-template-columns:minmax(0,1fr)}}
+.ftr p{color:var(--muted);margin:12px 0;max-width:46ch;font-size:14px}
+.ftr h4{margin:0 0 12px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.ftr ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.ftr li a{color:var(--muted);text-decoration:none;font-size:14px}
+.ftr li a:hover{color:var(--ink)}
+.copy{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between}
+
+/* menu lipat + iklan + admin */
+.moremenu{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface2)}
+.moremenu[hidden]{display:none}
+.moremenu .sharebar{margin:0}
+.adwrap[hidden]{display:none}
+.adwrap{padding-block:14px 0}
+.adwrap.bot{padding-block:26px 0}
+.adslot{max-width:728px;margin:0 auto;text-align:center}
+.adtag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.adslot a,.adslot .adimg{display:block;border-radius:14px;overflow:hidden;border:1px solid var(--line);line-height:0}
+.adslot img{width:100%;height:auto;display:block}
+.adslot iframe{width:100%;border:0;border-radius:14px;display:block;background:transparent}
+.capbox{min-height:65px;display:flex;justify-content:center}
+.btn.gbtn{background:#fff;border-color:#dadce0;color:#1f1f1f;gap:12px;width:100%;justify-content:center}
+.btn.gbtn:hover{filter:brightness(.96)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--field);color:var(--ink);font-weight:700;text-align:left;cursor:pointer}
+.sw .knob{flex:none;width:52px;height:30px;border-radius:999px;background:var(--surface2);border:1.5px solid var(--line);position:relative;transition:background .15s}
+.sw .knob::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.sw[aria-checked="true"] .knob{background:var(--accent)}
+.sw[aria-checked="true"] .knob::after{transform:translateX(22px);background:#fff}
+.adbox{border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+.adbox h3{margin:0;font-size:16px}
+.adprev{min-height:10px}
+.uidbox{font-family:var(--f-mono);font-size:13px;word-break:break-all;background:var(--field);border:1.5px solid var(--line);border-radius:12px;padding:11px 14px}
+@media (prefers-reduced-motion:reduce){.sw .knob,.sw .knob::after{transition:none}}
+
+/* overlay + toast */
+.ov{position:fixed;inset:0;background:rgba(3,6,20,.7);display:grid;place-items:center;padding:20px;z-index:60}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:var(--shadow)}
+.qrbox{background:#fff;border-radius:14px;padding:14px;display:grid;place-items:center;margin:12px auto;width:fit-content;max-width:100%}
+.qrbox img,.qrbox canvas{max-width:100%;height:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:70;max-width:calc(100vw - 32px);opacity:0;pointer-events:none;transition:opacity .18s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast,.btn,.faq summary svg{transition:none}.btn:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr"></header>
+<div class="g adwrap" hidden><div class="w" id="adtop"></div></div>
+<main class="g" id="mainwrap"><div class="w" id="main"></div></main>
+<div class="g adwrap bot" hidden><div class="w" id="adbot"></div></div>
+<footer class="ftr" id="footer"></footer>
+<div id="overlay"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ---------- util ---------- */
+var $=function(s,r){return (r||document).querySelector(s);};
+function el(tag,props){
+  var n=document.createElement(tag);
+  if(props){for(var k in props){var v=props[k]; if(v==null||v===false)continue;
+    if(k==='class')n.className=v; else if(k==='text')n.textContent=v;
+    else if(k.slice(0,2)==='on')n.addEventListener(k.slice(2),v);
+    else n.setAttribute(k,v===true?'':v);}}
+  for(var i=2;i<arguments.length;i++){var c=arguments[i]; if(Array.isArray(c)){c.forEach(function(x){if(x!=null&&x!==false)n.append(x.nodeType?x:document.createTextNode(String(x)));});}
+    else if(c!=null&&c!==false){n.append(c.nodeType?c:document.createTextNode(String(c)));}}
+  return n;
+}
+var ICONS={
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+  ext:'<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>',
+  qr:'<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h3v-3"/>',
+  trash:'<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/>',
+  edit:'<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  download:'<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+  back:'<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>',
+  send:'<path d="M5 12l14-7-5 15-3-6z"/>',
+  raw:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 0 0 4-4c0-5-4-9.5-9-9.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  file:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
+  chev:'<path d="M6 9l6 6 6-6"/>',
+  up:'<path d="M4 16l6-6 4 4 6-7"/><path d="M15 7h5v5"/>',
+  down:'<path d="M4 8l6 6 4-4 6 7"/><path d="M15 17h5v-5"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  hash:'<path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/>',
+  clip:'<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1"/><path d="M9 11h6M9 15h4"/>'
+};
+function icon(n,size){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox','0 0 24 24'); s.setAttribute('width',size||18); s.setAttribute('height',size||18);
+  s.setAttribute('fill','none'); s.setAttribute('stroke','currentColor'); s.setAttribute('stroke-width','2');
+  s.setAttribute('stroke-linecap','round'); s.setAttribute('stroke-linejoin','round'); s.setAttribute('aria-hidden','true');
+  s.innerHTML=ICONS[n]||''; return s;
+}
+function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h;}
+function fav(name){
+  var b=el('span',{class:'fav',text:String(name||'?').charAt(0).toUpperCase(),'aria-hidden':'true'});
+  b.style.setProperty('--h',String(hue(String(name||''))));return b;
+}
+var toastTimer=null;
+function toast(msg){
+  var t=$('#toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('on');},2200);
+}
+function copyText(text,okMsg){
+  function fallback(){
+    try{
+      var ta=el('textarea',{style:'position:fixed;left:-9999px;top:0','aria-hidden':'true'}); ta.value=text;
+      document.body.append(ta); ta.select(); var ok=document.execCommand('copy'); ta.remove();
+      toast(ok?(okMsg||'Tersalin'):'Salin manual: pilih teks lalu tekan Ctrl+C');
+    }catch(e){toast('Salin manual: pilih teks lalu tekan Ctrl+C');}
+  }
+  try{ navigator.clipboard.writeText(text).then(function(){toast(okMsg||'Tersalin');},fallback); }catch(e){fallback();}
+}
+function ago(ms){
+  var s=Math.floor((Date.now()-ms)/1000); if(s<45)return 'baru saja';
+  var m=Math.floor(s/60); if(m<60)return m+' menit lalu';
+  var h=Math.floor(m/60); if(h<24)return h+' jam lalu';
+  var d=Math.floor(h/24); if(d<30)return d+' hari lalu';
+  return new Date(ms).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+}
+function left(ms){
+  var d=ms-Date.now(); if(d<=0)return 'sudah kedaluwarsa';
+  var m=Math.ceil(d/60000); if(m<60)return 'kedaluwarsa '+m+' menit lagi';
+  var h=Math.ceil(m/60); if(h<24)return 'kedaluwarsa '+h+' jam lagi';
+  return 'kedaluwarsa '+Math.ceil(h/24)+' hari lagi';
+}
+function nf(n){return Number(n||0).toLocaleString('id-ID');}
+function dayKey(ms){var d=new Date(ms);return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+function lastDays(n){
+  var out=[],t=new Date();t.setHours(12,0,0,0);
+  for(var i=n-1;i>=0;i--){var d=new Date(t.getTime()-i*86400000);out.push({key:dayKey(d.getTime()),label:d.toLocaleDateString('id-ID',{weekday:'short'})});}
+  return out;
+}
+
+/* ---------- parsing link ---------- */
+var BARE=/^(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[\/?#]\S*)?$/i;
+function trimTrail(u){return u.replace(/[.,;:!?'")\]}>]+$/,'');}
+function toHref(raw){
+  var u=trimTrail(raw); if(/^www\./i.test(u))u='https://'+u;
+  try{var x=new URL(u); if(x.protocol!=='http:'&&x.protocol!=='https:')return null; return x.href;}catch(e){return null;}
+}
+function parseItems(text){
+  var out=[];
+  text.split(/\r?\n/).forEach(function(line){
+    var t=line.trim(); if(!t)return;
+    var m=t.match(/(?:https?:\/\/|www\.)[^\s<>"'`]+/i), href=null, label='';
+    if(m){
+      href=toHref(m[0]);
+      if(href)label=(t.slice(0,m.index)+' '+t.slice(m.index+m[0].length)).replace(/^[\s\-–—|:>•*·]+|[\s\-–—|:>•*·]+$/g,'').replace(/\s+/g,' ');
+    }else if(BARE.test(t)){href=toHref('https://'+t);}
+    if(href)out.push({t:'l',href:href,label:label}); else out.push({t:'x',text:t});
+  });
+  return out;
+}
+function dedupeLines(text){
+  var seen={}, keep=[];
+  text.split(/\r?\n/).forEach(function(line){
+    var it=parseItems(line)[0];
+    if(it&&it.t==='l'){ if(seen[it.href])return; seen[it.href]=1; }
+    keep.push(line);
+  });
+  return keep.join('\n');
+}
+function splitUrl(href){
+  try{var u=new URL(href); var rest=(u.pathname==='/'?'':u.pathname)+u.search+u.hash; return {host:u.hostname.replace(/^www\./,''),rest:rest};}
+  catch(e){return {host:href,rest:''};}
+}
+function linkify(parent,text){
+  var re=/(?:https?:\/\/|www\.)[^\s<>"'`]+/gi, last=0, m;
+  while((m=re.exec(text))){
+    var t=trimTrail(m[0]), href=toHref(t);
+    if(m.index>last)parent.append(document.createTextNode(text.slice(last,m.index)));
+    if(href)parent.append(el('a',{href:href,target:'_blank',rel:'noopener noreferrer nofollow',text:t})); else parent.append(document.createTextNode(t));
+    last=m.index+t.length; re.lastIndex=last;
+  }
+  if(last<text.length)parent.append(document.createTextNode(text.slice(last)));
+}
+
+/* ---------- rute & alamat ---------- */
+var PAGES={masuk:1,dashboard:1,kelola:1,ketentuan:1,privasi:1,tentang:1,admin:1};
+var SCROLLS={buat:'composer',fitur:'fitur',faq:'faq'};
+var RESERVED={settings:1,sidebar:1,customize:1,upgrade:1,downloads:1,baru:1,home:1,masuk:1,dashboard:1,kelola:1,ketentuan:1,privasi:1,tentang:1,buat:1,fitur:1,faq:1,admin:1};
+function validSlug(s){return /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(s)&&!RESERVED[s]&&s.indexOf('comment-')!==0;}
+function genSlug(){
+  var ch='abcdefghjkmnpqrstuvwxyz23456789', a=new Uint8Array(6), s='';
+  try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<6;i++)a[i]=Math.floor(Math.random()*256);}
+  for(var j=0;j<6;j++)s+=ch[a[j]%ch.length]; return s;
+}
+function kindOf(r){return !r?'home':PAGES[r]?r:SCROLLS[r]?'home':'paste';}
+function shortLink(slug){return location.href.split('#')[0]+'#'+slug;}
+
+/* ---------- enkripsi ---------- */
+var CAN_CRYPTO=!!(window.crypto&&crypto.subtle&&window.TextEncoder);
+function toB64(buf){var b=new Uint8Array(buf),s='';for(var i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s);}
+function fromB64(s){var bin=atob(s),b=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b;}
+function deriveKey(pwd,salt){
+  return crypto.subtle.importKey('raw',new TextEncoder().encode(pwd),'PBKDF2',false,['deriveKey']).then(function(base){
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  });
+}
+function encryptText(text,pwd){
+  var salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  return deriveKey(pwd,salt).then(function(key){
+    return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(text));
+  }).then(function(ct){return {enc:true,body:toB64(ct),salt:toB64(salt),iv:toB64(iv)};});
+}
+function decryptText(c,pwd){
+  return deriveKey(pwd,fromB64(c.salt)).then(function(key){
+    return crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(c.iv)},key,fromB64(c.body));
+  }).then(function(buf){return new TextDecoder().decode(buf);});
+}
+
+/* ---------- state ---------- */
+var ACCT_DOMAIN='@akun.pastekan.app';
+var S={db:null,auth:null,ready:false,noConfig:false,dbChecked:false,uid:null,acct:'',canWrite:true,admin:false,net:'connecting',
+  pub:[],mine:[],metas:new Map(),listReady:false,agg:{},hits:new Map(),statsAt:0,tab:'recent',q:'',shown:30,
+  slug:'',rendered:false,cur:null,editing:false,pwds:new Map(),viewed:{},flash:'',flashSlug:'',raw:false,
+  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adKey:'',isAdmin:null,next:''};
+
+function isMine(m){return !!(m&&m.ownerId&&S.uid&&m.ownerId===S.uid);}
+function canManage(m){return isMine(m)&&!!S.acct;}
+function expiryOf(m){return m&&m.expiresAt&&m.expiresAt>0?m.expiresAt:0;}
+function isExpired(m){var e=expiryOf(m);return !!(e&&e<=Date.now());}
+function statusOf(m){return isExpired(m)?['bad','Kedaluwarsa']:m.locked?['warn','Terkunci']:['ok','Aktif'];}
+function viewsText(slug){var a=S.agg[slug]; return (a?nf(a.total):'–')+' dilihat';}
+function renderStatus(){
+  var c=$('#status'); if(!c)return;
+  var map={connecting:['','Menghubungkan…'],ok:['ok','Semua sistem berjalan normal'],offline:['bad','Belum tersambung'],slow:['warn','Menunggu penyimpanan…'],error:['bad','Gangguan koneksi']};
+  var m=map[S.net]||map.connecting; c.className='chip '+m[0]; c.lastChild.textContent=m[1];
+}
+function rebuildMetas(){var m=new Map(); S.pub.forEach(function(x){m.set(x.slug,x);}); S.mine.forEach(function(x){m.set(x.slug,x);}); S.metas=m;}
+
+/* ---------- tema ---------- */
+function isDark(){
+  var a=document.documentElement.getAttribute('data-theme');
+  if(a)return a==='dark';
+  try{return !matchMedia('(prefers-color-scheme: light)').matches;}catch(e){return true;}
+}
+function toggleTheme(){
+  var next=isDark()?'light':'dark'; document.documentElement.setAttribute('data-theme',next);
+  try{localStorage.setItem('pl-theme',next);}catch(e){} renderHeader();
+}
+
+/* ---------- header & footer ---------- */
+function navLink(r,label,ic){
+  var cur=S.slug===r||(r===''&&S.slug==='');
+  var a=el('a',{href:'#'+r,onclick:function(e){e.preventDefault();S.menu=false;go(r);}},ic?icon(ic,20):null,label);
+  if(cur&&!SCROLLS[r])a.setAttribute('aria-current','page');
+  return a;
+}
+function renderHeader(){
+  var h=$('#hdr');
+  var items=[['','Beranda','home'],['buat','Buat Paste','plus']].concat(S.acct?[['dashboard','Dashboard','chart']]:[],[['fitur','Fitur Unggulan','star'],['faq','FAQ','help']]);
+  var nav=el('nav',{class:'nav','aria-label':'Menu utama'},items.map(function(i){return navLink(i[0],i[1]);}));
+  var acct=S.acct
+    ?[el('span',{class:'chip info dsk'},icon('user',13),'@'+S.acct),el('button',{type:'button',class:'btn sm dsk',onclick:function(){setAcct('');toast('Sudah keluar');}},'Keluar')]
+    :[el('button',{type:'button',class:'btn sm dsk',onclick:function(){S.authMode='login';go('masuk');}},'Masuk'),el('button',{type:'button',class:'btn sm light dsk',onclick:function(){S.authMode='register';go('masuk');}},'Daftar')];
+  var theme=el('button',{type:'button',class:'icon-btn',onclick:toggleTheme,'aria-label':'Ganti tema terang atau gelap'},icon(isDark()?'sun':'moon',18));
+  var burger=el('button',{type:'button',class:'icon-btn only-m','aria-label':S.menu?'Tutup menu':'Buka menu','aria-expanded':String(S.menu),onclick:function(){S.menu=!S.menu;renderHeader();}},icon(S.menu?'x':'menu',20));
+  var panel=el('div',{class:'mpanel'+(S.menu?' on':''),id:'mpanel'},
+    items.map(function(i){return navLink(i[0],i[1],i[2]);}),
+    S.acct
+      ?el('div',{class:'mb'},el('span',{class:'chip info',style:'justify-content:center;padding:12px'},'@'+S.acct),el('button',{type:'button',class:'btn',onclick:function(){S.menu=false;setAcct('');toast('Sudah keluar');}},'Keluar'))
+      :el('div',{class:'mb'},el('button',{type:'button',class:'btn',onclick:function(){S.menu=false;S.authMode='login';go('masuk');}},'Masuk'),el('button',{type:'button',class:'btn light',onclick:function(){S.menu=false;S.authMode='register';go('masuk');}},'Daftar')));
+  var brand=el('button',{type:'button',class:'brand','aria-label':'Pastekan Linkmu, ke beranda',onclick:function(){S.menu=false;go('');}},
+    el('span',{class:'mark'},icon('clip',22)),
+    el('span',null,el('span',{class:'wm'},'Pastekan ',el('b',null,'Linkmu')),el('span',{class:'tg'},'Simpan & Bagikan Teks atau Link')));
+  h.replaceChildren(el('div',{class:'g',style:'position:relative'},el('div',{class:'w hdr-in'},brand,nav,el('div',{class:'hr'},acct,theme,burger)),panel));
+}
+function fl(r,t){return el('li',null,el('a',{href:'#'+r,onclick:function(e){e.preventDefault();go(r);}},t));}
+function renderFooter(){
+  $('#footer').replaceChildren(el('div',{class:'g'},el('div',{class:'w ftr-in'},
+    el('div',{class:'fcols'},
+      el('div',null,
+        el('div',{class:'brand',style:'cursor:default'},el('span',{class:'mark'},icon('clip',22)),el('span',{class:'wm'},'Pastekan ',el('b',null,'Linkmu'))),
+        el('p',null,'Simpan teks atau daftar link, lalu bagikan lewat satu alamat pendek. Bisa dikunci sandi dan diberi masa berlaku.'),
+        el('span',{class:'chip',id:'status'},el('i'),el('span',{text:'Menghubungkan…'}))),
+      el('div',null,el('h4',{text:'Platform & Fitur'}),el('ul',null,fl('buat','Buat Paste'),S.acct?fl('kelola','Kelola Tautan Saya'):null,S.acct?fl('dashboard','Dashboard'):null,fl('fitur','Fitur Unggulan'),fl('faq','Tanya Jawab (FAQ)'))),
+      el('div',null,el('h4',{text:'Informasi & Legal'}),el('ul',null,fl('ketentuan','Ketentuan Layanan'),fl('privasi','Kebijakan Privasi'),fl('tentang','Tentang Kami'),fl('admin','Admin')))),
+    el('div',{class:'copy'},el('span',{text:'© 2026 Pastekan Linkmu. Semua hak dilindungi.'}),el('span',{text:'Dibuat di Indonesia'})))));
+  renderStatus();
+}
+
+/* ---------- routing ---------- */
+function readSlug(){
+  var h=''; try{h=decodeURIComponent(location.hash.slice(1));}catch(e){}
+  h=h.trim().toLowerCase();
+  if(PAGES[h]||SCROLLS[h])return h;
+  return validSlug(h)?h:'';
+}
+function navTo(r,force){
+  if(!force&&S.rendered&&r===S.slug)return;
+  if(r!==S.flashSlug)S.flash='';
+  S.slug=r; S.editing=false; S.raw=false; S.rendered=true; S.cur=null; S.menu=false; S.more=false;
+  renderHeader(); renderAds();
+  var k=kindOf(r);
+  if(k==='home')renderHome();
+  else if(k==='paste')openPaste(r);
+  else if(k==='masuk')renderAuth();
+  else if(k==='admin')renderAdmin();
+  else if(k==='dashboard')renderDash();
+  else if(k==='kelola')renderManage();
+  else renderInfo(k);
+  if(SCROLLS[r]){setTimeout(function(){var t=document.getElementById(SCROLLS[r]);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},40);}
+  else{try{window.scrollTo(0,0);}catch(e){}}
+}
+function go(r){
+  try{location.hash=r||'';}catch(e){}
+  navTo(r||'',true);
+}
+function refreshLive(){
+  var k=kindOf(S.slug);
+  if(k==='home')renderRail();
+  else if(k==='dashboard')renderDash();
+  else if(k==='kelola')updateManage();
+}
+
+/* ---------- data (Firebase) ---------- */
+function metaFrom(snap){return Object.assign({},snap.data(),{slug:snap.id});}
+function openPaste(slug){
+  S.cur={status:'loading'}; renderView();
+  if(!S.db){ if(S.dbChecked){S.cur={status:'offline'};renderView();} return; }
+  S.db.collection('pastes').doc(slug).get().then(function(ms){
+    if(S.slug!==slug)return null;
+    if(!ms.exists){S.cur={status:'notfound'};renderView();return null;}
+    var meta=metaFrom(ms);
+    if(isExpired(meta)){S.cur={status:'expired',meta:meta};renderView();return null;}
+    return S.db.collection('contents').doc(slug).get().then(function(cs){
+      if(S.slug!==slug)return;
+      if(!cs.exists){S.cur={status:'notfound'};renderView();return;}
+      var content=cs.data();
+      if(meta.locked||content.enc){
+        S.cur={status:'locked',meta:meta,content:content};
+        var saved=S.pwds.get(slug);
+        if(saved){ unlock(saved,true); return; }
+      }else{
+        S.cur={status:'ok',meta:meta,content:content,text:String(content.body||'')};
+        recordView(slug,meta);
+      }
+      renderView();
+    });
+  }).catch(function(e){
+    if(S.slug!==slug)return; S.cur={status:'error',err:e}; renderView();
+  });
+}
+function unlock(pwd,silent){
+  var cur=S.cur; if(!cur||!cur.content)return Promise.resolve();
+  return decryptText(cur.content,pwd).then(function(text){
+    if(S.cur!==cur)return;
+    S.pwds.set(cur.meta.slug,pwd);
+    S.cur={status:'ok',meta:cur.meta,content:cur.content,text:text,pwd:pwd};
+    recordView(cur.meta.slug,cur.meta); renderView();
+  }).catch(function(){
+    if(S.cur!==cur)return;
+    S.pwds.delete(cur.meta.slug);
+    if(!silent){var e=$('#lock-err'); if(e)e.textContent='Kata sandi salah. Coba lagi.';} else renderView();
+  });
+}
+function loadCount(slug){
+  if(!S.db)return;
+  S.db.collection('counts').doc(slug).get().then(function(s){
+    var n=s.exists?(Number(s.data().n)||0):0; S.agg[slug]={total:n};
+    var vc=$('#vc'); if(vc&&S.slug===slug)vc.textContent=nf(n)+' dilihat';
+  }).catch(function(){});
+}
+function recordView(slug,meta){
+  if(!S.db||!S.uid||!meta||S.viewed[slug]){loadCount(slug);return;}
+  S.viewed[slug]=1;
+  if(S.flash==='created'&&S.flashSlug===slug){loadCount(slug);return;}
+  /* Kunjungan pemilik sendiri tidak dihitung. */
+  if(meta.ownerId&&meta.ownerId===S.uid){loadCount(slug);return;}
+  var db=S.db, inc=firebase.firestore.FieldValue.increment(1), owner=meta.ownerId, day=dayKey(Date.now()), now=Date.now();
+  /* Sekali per pengunjung per hari (dicatat di browser pengunjung). */
+  var vkey='pkv:'+slug;
+  try{if(localStorage.getItem(vkey)===day){loadCount(slug);return;}}catch(e){}
+  /* Catatan hitungan: kalau belum ada dibuat dulu. Aturan Firestore menolak update dokumen yang belum ada,
+     jadi dibaca dulu (counts boleh dibaca). */
+  function bumpCount(ref,create){
+    return ref.get().then(function(s){
+      if(s.exists)return ref.update({n:inc});
+      return ref.set(create).catch(function(e){if(e&&e.code==='permission-denied')return ref.update({n:inc});throw e;});
+    });
+  }
+  /* hits tidak boleh dibaca: coba buat dulu, kalau sudah ada (ditolak) naikkan angkanya. */
+  function bumpHit(ref,create){
+    return ref.set(create).catch(function(e){if(e&&e.code==='permission-denied')return ref.update({n:inc,last:now});throw e;});
+  }
+  bumpCount(db.collection('counts').doc(slug),{slug:slug,owner:owner,n:1}).then(function(){
+    try{localStorage.setItem(vkey,day);}catch(e){}
+    return bumpHit(db.collection('hits').doc(slug+'~'+day),{slug:slug,day:day,owner:owner,n:1,last:now});
+  }).then(function(){loadCount(slug);}).catch(function(){loadCount(slug);});
+}
+function removePaste(slug){
+  var db=S.db;
+  return db.collection('contents').doc(slug).delete().then(function(){return db.collection('pastes').doc(slug).delete();}).then(function(){
+    return Promise.all([
+      db.collection('counts').doc(slug).delete().catch(function(){}),
+      db.collection('hits').where('owner','==',S.uid).where('slug','==',slug).get().then(function(q){
+        return Promise.all(q.docs.map(function(d){return d.ref.delete();}));
+      }).catch(function(){})
+    ]);
+  }).then(function(){
+    delete S.agg[slug]; S.hits.forEach(function(v,k){if(v.slug===slug)S.hits.delete(k);}); refreshLive();
+  });
+}
+var unsubs=[];
+/* Daftar paste hanya dimuat untuk pengguna yang sudah punya akun, dan hanya milik akun itu. Tamu hanya bisa membuat link. */
+function startData(){
+  unsubs.forEach(function(u){try{u();}catch(e){}}); unsubs=[];
+  S.pub=[]; S.mine=[]; S.agg={}; S.hits=new Map(); S.statsAt=0; S.dataAcct=!!S.acct; rebuildMetas();
+  if(!S.acct){S.listReady=true; S.net='ok'; renderStatus(); return;}
+  S.listReady=false;
+  var loadTimer=setTimeout(function(){if(!S.listReady){S.net='slow';renderStatus();}},10000);
+  unsubs.push(S.db.collection('pastes').where('ownerId','==',S.uid).limit(300).onSnapshot(function(snap){
+    clearTimeout(loadTimer); S.mine=snap.docs.map(metaFrom); S.listReady=true; S.net='ok'; renderStatus(); rebuildMetas(); refreshLive();
+  },function(){clearTimeout(loadTimer);S.net='error';renderStatus();}));
+}
+/* Statistik dibaca sekali saat Dashboard atau Kelola dibuka (hemat kuota baca harian). */
+function loadStats(force){
+  if(!S.db||!S.uid)return Promise.resolve();
+  if(!force&&Date.now()-S.statsAt<15000)return Promise.resolve();
+  S.statsAt=Date.now();
+  var from=dayKey(Date.now()-6*86400000), db=S.db;
+  return Promise.all([
+    db.collection('counts').where('owner','==',S.uid).get(),
+    db.collection('hits').where('owner','==',S.uid).where('day','>=',from).get()
+  ]).then(function(r){
+    var agg={}; r[0].docs.forEach(function(d){agg[d.id]={total:Number(d.data().n)||0};});
+    var hm=new Map(); r[1].docs.forEach(function(d){var v=d.data(); if(v&&v.slug)hm.set(d.id,v);});
+    S.agg=agg; S.hits=hm; refreshLive();
+  }).catch(function(){});
+}
+function applyUser(u){
+  var changed=S.uid!==u.uid;
+  S.uid=u.uid; if(changed)S.isAdmin=null;
+  if(!S.ads&&!S.adsAsked)loadAds();
+  if(u.email&&u.email.slice(-ACCT_DOMAIN.length)===ACCT_DOMAIN)S.acct=u.email.slice(0,-ACCT_DOMAIN.length);
+  else if(!u.isAnonymous&&u.email)S.acct=String(u.displayName||u.email.split('@')[0]).trim().split(/\s+/)[0].slice(0,20)||'akun';
+  else S.acct='';
+  var acctChanged=(!!S.acct)!==S.dataAcct;
+  S.dbChecked=true; renderHeader(); renderFooter();
+  if(changed||acctChanged)startData();
+  if(!S.ready){S.ready=true;navTo(S.slug,true);}
+  else if(changed||acctChanged)navTo(S.slug,true);
+  else refreshLive();
+}
+
+/* ---------- komponen form ---------- */
+var EXPIRY=[{v:'0',label:'Selamanya',icon:'clock'},{v:'3600000',label:'1 jam'},{v:'86400000',label:'1 hari'},{v:'604800000',label:'7 hari'},{v:'2592000000',label:'30 hari'}];
+var EXAMPLE='Dokumentasi MDN - https://developer.mozilla.org\nGitHub: https://github.com\nhttps://www.wikipedia.org\nkamus.kemdikbud.go.id';
+function chipGroup(opts,val,label){
+  var cur=val, node=el('div',{class:'chips',role:'radiogroup','aria-label':label}), btns=[];
+  function paint(){btns.forEach(function(p){p[0].setAttribute('aria-checked',String(p[1].v===cur));});}
+  opts.forEach(function(o){
+    var b=el('button',{type:'button',role:'radio',class:'opt'},o.icon?icon(o.icon,17):null,el('span',null,el('b',{text:o.label}),o.sub?el('small',{text:o.sub}):null));
+    b.addEventListener('click',function(){cur=o.v;paint();});
+    btns.push([b,o]); node.append(b);
+  });
+  paint();
+  return {node:node,get:function(){return cur;}};
+}
+function buildComposer(edit){
+  var isEdit=!!edit, meta=isEdit?edit.meta:null, mode=isEdit?(meta.mode||'links'):'links';
+  var title=el('input',{id:'f-title',class:'inp',type:'text',maxlength:'80',placeholder:'Judul (opsional), mis. Bahan belajar React'});
+  var body=el('textarea',{id:'f-body',class:'inp',spellcheck:'false',autocapitalize:'off',autocomplete:'off','aria-label':'Isi paste'});
+  var count=el('span',{id:'count'});
+  var segL=el('button',{type:'button',role:'radio',text:'Daftar link'});
+  var segT=el('button',{type:'button',role:'radio',text:'Teks biasa'});
+  var slugIn=el('input',{id:'f-slug',class:'inp',type:'text',maxlength:'40',placeholder:'kosongkan untuk acak',autocomplete:'off',autocapitalize:'off',spellcheck:'false'});
+  var slugHint=el('div',{class:'hint',id:'slug-hint'});
+  var expOpts=isEdit?[{v:'keep',label:'Tetap',sub:'seperti sekarang'}].concat(EXPIRY):EXPIRY;
+  var exp=chipGroup(expOpts,isEdit?'keep':'0','Masa berlaku');
+  var pwd=el('input',{id:'f-pwd',class:'inp',type:'password',placeholder:'Tanpa sandi',autocomplete:'new-password'});
+  var dedupe=el('input',{id:'f-dedupe',type:'checkbox'});
+  var err=el('div',{class:'err',id:'form-err',role:'alert'});
+  var cap=isEdit?null:captcha();
+  var submit=el('button',{type:'button',class:'btn primary lg block',id:'f-submit'},icon(isEdit?'edit':'bolt',17),el('span',{text:isEdit?'Simpan perubahan':'Pastekan Sekarang'}));
+  var dedupeWrap=el('label',{class:'check'},dedupe,'Hapus link ganda');
+  if(!CAN_CRYPTO){pwd.disabled=true;pwd.placeholder='Tidak didukung browser ini';}
+  if(isEdit){title.value=meta.title||''; body.value=edit.text||''; slugIn.value=meta.slug; slugIn.disabled=true; pwd.value=edit.pwd||'';}
+
+  function setMode(m){
+    mode=m; segL.setAttribute('aria-checked',String(m==='links')); segT.setAttribute('aria-checked',String(m==='text'));
+    body.placeholder=m==='links'?'Satu link per baris. Tulis nama sebelum link kalau mau:\nDokumentasi - https://contoh.com':'Tempel teks apa saja. Link di dalamnya otomatis bisa diklik.';
+    dedupeWrap.hidden=(m!=='links'); updateCount();
+  }
+  function updateCount(){
+    var t=body.value; if(!t.trim()){count.textContent='Belum ada isi';return;}
+    if(mode==='links'){
+      var it=parseItems(t), l=it.filter(function(x){return x.t==='l';}).length, x=it.length-l;
+      count.textContent=nf(l)+' link terdeteksi'+(x?' · '+nf(x)+' baris judul/teks':'');
+    }else count.textContent=nf(t.length)+' karakter';
+  }
+  var slugTimer=null;
+  function checkSlug(){
+    clearTimeout(slugTimer);
+    slugTimer=setTimeout(function(){
+      var v=slugIn.value.trim().toLowerCase(); slugHint.className='hint';
+      if(!v){slugHint.textContent='Alamat acak 6 karakter akan dibuat.';return;}
+      if(!validSlug(v)){slugHint.textContent='Pakai 3–40 huruf kecil, angka, atau tanda hubung.';slugHint.className='hint bad';return;}
+      if(S.metas.has(v)){slugHint.textContent='Alamat ini sudah dipakai.';slugHint.className='hint bad';return;}
+      if(!S.db){slugHint.textContent='Alamat tersedia.';slugHint.className='hint ok';return;}
+      S.db.collection('pastes').doc(v).get().then(function(sn){
+        if(slugIn.value.trim().toLowerCase()!==v)return;
+        if(sn.exists){slugHint.textContent='Alamat ini sudah dipakai.';slugHint.className='hint bad';}
+        else{slugHint.textContent='Alamat tersedia.';slugHint.className='hint ok';}
+      }).catch(function(){slugHint.textContent='';});
+    },500);
+  }
+  segL.addEventListener('click',function(){setMode('links');});
+  segT.addEventListener('click',function(){setMode('text');});
+  body.addEventListener('input',updateCount);
+  if(!isEdit)slugIn.addEventListener('input',checkSlug);
+  function fail(msg){err.textContent=msg;}
+  function busy(b){submit.disabled=b; submit.lastChild.textContent=b?'Menyimpan…':(isEdit?'Simpan perubahan':'Pastekan Sekarang');}
+
+  submit.addEventListener('click',function(){
+    fail('');
+    var text=body.value.replace(/\r\n/g,'\n');
+    if(!S.db)return fail('Belum tersambung ke penyimpanan. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini.');
+    if(!S.uid)return fail('Akunmu belum terdeteksi. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini.');
+    if(S.canWrite===false)return fail('Akunmu hanya bisa melihat halaman ini. Minta akses Contributor ke pemilik halaman untuk membuat paste.');
+    if(!text.trim())return fail('Isi masih kosong.');
+    if(text.length>100000)return fail('Isi terlalu panjang. Maksimal 100.000 karakter.');
+    if(mode==='links'&&dedupe.checked)text=dedupeLines(text);
+    var items=parseItems(text), linkCount=items.filter(function(i){return i.t==='l';}).length;
+    if(mode==='links'&&!linkCount)return fail('Tidak ada link terdeteksi. Pilih "Teks biasa" kalau isinya bukan daftar link.');
+    var pw=pwd.value; if(pw&&!CAN_CRYPTO)return fail('Browser ini tidak mendukung enkripsi, jadi sandi tidak bisa dipakai.');
+    var custom=isEdit?meta.slug:slugIn.value.trim().toLowerCase();
+    if(!isEdit&&custom&&!validSlug(custom))return fail('Alamat kustom: pakai 3–40 huruf kecil, angka, atau tanda hubung.');
+    if(cap&&!cap.ok())return fail('Selesaikan captcha dulu.');
+    var ev=exp.get(), expiresAt=ev==='keep'?expiryOf(meta):(Number(ev)>0?Date.now()+Number(ev):0);
+    var now=Date.now();
+    var fields={title:title.value.trim(),mode:mode,locked:!!pw,listed:false,expiresAt:expiresAt,updatedAt:now,linkCount:linkCount,lineCount:items.length};
+    busy(true);
+    var contentP=pw?encryptText(text,pw):Promise.resolve({enc:false,body:text});
+    var work;
+    if(isEdit){
+      work=contentP.then(function(c){return S.db.collection('contents').doc(custom).set(c);}).then(function(){return S.db.collection('pastes').doc(custom).update(fields);}).then(function(){return custom;});
+    }else{
+      work=contentP.then(function(c){
+        return claimSlug(custom,Object.assign({createdAt:now,ownerId:S.uid},fields)).then(function(slug){
+          return S.db.collection('contents').doc(slug).set(c).then(function(){return slug;},function(e){
+            return S.db.collection('pastes').doc(slug).delete().catch(function(){}).then(function(){throw e;});
+          });
+        });
+      });
+    }
+    work.then(function(slug){
+      if(pw)S.pwds.set(slug,pw); else S.pwds.delete(slug);
+      busy(false);
+      if(isEdit){toast('Perubahan disimpan');S.editing=false;navTo(slug,true);}
+      else{S.flash='created';S.flashSlug=slug;go(slug);}
+    }).catch(function(e){
+      busy(false); if(cap)cap.reset(); var c=e&&e.code;
+      fail(e&&e.user?e.message:c==='resource-exhausted'?'Kuota gratis hari ini habis. Coba lagi besok.':c==='permission-denied'?'Penyimpanan ditolak. Pastikan aturan Firestore sudah di-deploy dan tipe login Anonim diaktifkan.':'Gagal menyimpan. Coba lagi sebentar lagi.');
+    });
+  });
+
+  setMode(mode);
+  var head=el('div',{class:'bodyhead'},el('div',{class:'seg',role:'radiogroup','aria-label':'Jenis isi'},segL,segT),
+    isEdit?null:el('button',{type:'button',class:'btn sm',text:'Isi contoh',onclick:function(){body.value=EXAMPLE;setMode('links');body.focus();}}));
+  var form=el('div',{class:'stack'},
+    el('div',null,el('label',{for:'f-title',text:'Judul paste'}),title),
+    el('div',null,head,body,el('div',{class:'bodyfoot'},count,el('span',{text:'Maks. 100.000 karakter'}))),
+    el('div',null,el('div',{class:'lab',text:'Masa berlaku'}),exp.node),
+    el('div',{class:'row2'},
+      el('div',null,el('label',{for:'f-slug',text:'Alamat kustom'}),el('div',{class:'slugbox'},el('span',{text:'#'}),slugIn),slugHint),
+      el('div',null,el('label',{for:'f-pwd',text:'Kata sandi (opsional)'}),pwd,el('div',{class:'hint',text:'Isi dienkripsi di browser. Sandi hilang berarti isi tidak bisa dibuka.'}))),
+    dedupeWrap,cap&&cap.node?el('div',null,cap.node):null,err,
+    el('div',{class:'actions'},submit,isEdit?el('button',{type:'button',class:'btn lg',text:'Batal',onclick:function(){S.editing=false;renderView();}}):null));
+  if(!isEdit)checkSlug();
+  return form;
+}
+function claimSlug(custom,meta){
+  var tries=custom?1:6, i=0;
+  function userErr(m){var e=new Error(m);e.user=true;return e;}
+  function attempt(){
+    if(i++>=tries)return Promise.reject(userErr('Alamat acak sedang bentrok. Coba lagi.'));
+    var cand=custom||genSlug(), ref=S.db.collection('pastes').doc(cand);
+    return ref.get().then(function(sn){
+      if(sn.exists)return custom?Promise.reject(userErr('Alamat "'+cand+'" sudah dipakai. Pilih yang lain.')):attempt();
+      return ref.set(meta).then(function(){return cand;});
+    });
+  }
+  return attempt();
+}
+
+/* ---------- beranda ---------- */
+function tile(c,ic,h,p,no){
+  var t=el('div',{class:'tile'},no?el('span',{class:'no',text:no}):null,el('div',{class:'ti'},icon(ic,22)),el('h3',{text:h}),el('p',{text:p}));
+  t.style.setProperty('--c','var(--'+c+')'); return t;
+}
+var FAQ=[
+  ['Apa itu Pastekan Linkmu?','Layanan sederhana untuk menyimpan teks atau daftar link, lalu membagikannya lewat satu alamat pendek.'],
+  ['Apakah saya perlu akun?','Untuk membuat link tidak perlu. Tapi tanpa akun, link yang kamu buat tidak tersimpan di mana pun dan tidak bisa diedit, dihapus, atau dilihat statistiknya. Dengan akun (nama pengguna atau Google), semua link-mu tersimpan di Dashboard dan Kelola Tautan.'],
+  ['Bagaimana kata sandi bekerja?','Isi paste dienkripsi di browser dengan AES-256 sebelum disimpan. Sandi tidak pernah disimpan, jadi kalau lupa, isinya tidak bisa dipulihkan.'],
+  ['Bagaimana masa berlaku bekerja?','Setelah waktunya habis, paste tidak bisa dibuka lagi. Pembuatnya masih bisa menghapusnya lewat Kelola Tautan.'],
+  ['Siapa yang bisa membuka paste?','Siapa saja yang punya alamatnya. Paste tidak tampil di daftar mana pun, jadi hanya orang yang kamu beri alamatnya yang bisa membukanya. Untuk menyembunyikan isinya sepenuhnya, beri kata sandi.'],
+  ['Bisakah paste diedit atau dihapus?','Bisa, oleh pembuatnya yang sudah masuk akun. Buka paste atau halaman Kelola Tautan, lalu pilih Edit atau Hapus.']
+];
+function renderHome(){
+  S.cur=null;
+  var banner=null;
+  if(S.dbChecked&&!S.db)banner=el('div',{class:'notice warn',style:'margin-bottom:16px'},'Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini untuk membuat dan membuka paste.');
+  else if(S.canWrite===false)banner=el('div',{class:'notice warn',style:'margin-bottom:16px'},'Akunmu hanya bisa melihat dan membuka paste. Untuk membuat paste, pemilik halaman perlu memberi akses Contributor.');
+  var hero=el('section',{class:'hero'},
+    el('span',{class:'chip info'},icon('bolt',13),'Gratis · tanpa daftar'),
+    el('h1',null,'Bagikan Teks & Tautan ',el('span',{class:'gt',text:'Secara Cepat, Aman & Gratis'})),
+    el('p',null,'Tempel teks atau daftar link, dapatkan satu alamat pendek, lalu bagikan. Bisa dikunci sandi, diberi masa berlaku, dan dilihat berapa kali dibuka.'),
+    el('div',{class:'actions center'},
+      el('button',{type:'button',class:'btn primary lg',onclick:function(){go('buat');}},icon('plus',18),'Buat Paste Sekarang'),
+      el('button',{type:'button',class:'btn lg',onclick:function(){go('fitur');}},'Lihat Fitur')),
+    el('div',{class:'trio'},
+      el('div',{class:'tri'},el('b',{text:'Gratis'}),el('span',{text:'Tanpa biaya, tanpa ribet'})),
+      el('div',{class:'tri'},el('b',{text:'Instan'}),el('span',{text:'Alamat langsung jadi'})),
+      el('div',{class:'tri'},el('b',{text:'Terkunci'}),el('span',{text:'Sandi opsional'}))));
+  var composer=el('section',{class:'card',id:'composer'},el('h2',null,el('span',{class:'hbadge'},icon('plus',18)),'Buat paste baru'),banner,buildComposer(null));
+  var openIn=el('input',{id:'open-code',class:'inp mono',type:'text',placeholder:'kode paste, mis. belajar-react',autocomplete:'off',autocapitalize:'off','aria-label':'Kode paste'});
+  function openCode(){var v=openIn.value.trim().replace(/^.*#/,'').toLowerCase(); if(!validSlug(v)){toast('Kode tidak valid');return;} go(v);}
+  openIn.addEventListener('keydown',function(e){if(e.key==='Enter')openCode();});
+  var q=el('input',{class:'inp',type:'search',placeholder:'Cari judul atau alamat',id:'rail-q','aria-label':'Cari paste saya',value:S.q||null});
+  q.addEventListener('input',function(){S.q=q.value;S.shown=20;renderRail();});
+  var rail=el('aside',{class:'card',id:'rail'},
+    el('h2',null,el('span',{class:'hbadge'},icon('ext',17)),'Buka paste'),
+    el('div',{class:'openbox'},openIn,el('button',{type:'button',class:'btn',text:'Buka',onclick:openCode})),
+    el('div',{class:'lab',id:'rail-h',text:'Paste saya',style:'margin-top:16px'}),q,el('div',{style:'height:10px'}),el('div',{class:'list',id:'list'}));
+  var steps=el('section',{class:'sec',id:'cara'},
+    el('div',{class:'sec-h'},el('span',{class:'chip info',text:'Cara kerja'}),el('h2',null,'Tiga langkah, selesai'),el('p',{text:'Dari tempel sampai bagikan, tanpa ribet.'})),
+    el('div',{class:'steps'},
+      tile('ci1','file','Tempel teks atau link','Tulis atau tempel isinya. Link di dalamnya otomatis dikenali dan dirapikan.','01'),
+      tile('ci2','clock','Atur keamanan & masa aktif','Beri kata sandi dan tentukan kapan paste berakhir, dari 1 jam sampai 30 hari.','02'),
+      tile('ci4','send','Bagikan alamat pendek','Salin alamatnya, tampilkan kode QR, atau kirim langsung ke WhatsApp dan Telegram.','03')));
+  var feats=el('section',{class:'sec',id:'fitur'},
+    el('div',{class:'sec-h'},el('span',{class:'chip info',text:'Fitur unggulan'}),el('h2',null,'Lengkap untuk berbagi teks dan link'),el('p',{text:'Semua yang kamu perlukan ada di satu tempat.'})),
+    el('div',{class:'fgrid'},
+      tile('ci1','bolt','Gratis & instan','Tanpa biaya dan tanpa daftar. Alamat pendek langsung jadi begitu disimpan.'),
+      tile('ci3','lock','Proteksi kata sandi','Isi dienkripsi di browser sebelum disimpan, jadi hanya yang tahu sandi yang bisa membaca.'),
+      tile('ci2','clock','Masa aktif otomatis','Pilih 1 jam sampai 30 hari. Setelah itu paste tidak bisa dibuka lagi.'),
+      tile('ci4','chart','Statistik kunjungan','Lihat berapa kali dan berapa orang membuka, lengkap dengan grafik 7 hari di Dashboard.'),
+      tile('ci5','download','Unduh .txt instan','Simpan isi paste sebagai berkas teks hanya dengan satu klik.'),
+      tile('ci6','qr','Kode QR & bagikan cepat','Kode QR untuk dipindai, plus tombol kirim ke WhatsApp dan Telegram.')));
+  var faq=el('section',{class:'sec',id:'faq'},
+    el('div',{class:'sec-h'},el('span',{class:'chip info',text:'Tanya jawab'}),el('h2',null,'Sering ditanyakan'),el('p',{text:'Jawaban singkat untuk pertanyaan yang paling sering muncul.'})),
+    el('div',{class:'faq'},FAQ.map(function(f){return el('details',null,el('summary',null,el('span',{text:f[0]}),icon('chev',18)),el('p',{text:f[1]}));})));
+  var cta=el('section',{class:'cta'},el('h2',{text:'Siap membagikan teks dan tautanmu?'}),el('p',{text:'Buat paste pertamamu sekarang. Tidak perlu akun.'}),
+    el('div',{class:'actions center'},el('button',{type:'button',class:'btn light lg',onclick:function(){go('buat');}},'Buat Paste Sekarang'),el('button',{type:'button',class:'btn lg',style:'background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)',onclick:function(){S.authMode='register';go('masuk');}},'Daftar Akun')));
+  $('#main').replaceChildren(hero,el('div',{class:'cols'},composer,rail),steps,feats,faq,cta);
+  renderRail();
+}
+function renderRail(){
+  var list=$('#list'); if(!list)return;
+  var rh=$('#rail-h'), rq=$('#rail-q'); if(rh)rh.hidden=!S.acct; if(rq)rq.hidden=!S.acct;
+  if(!S.acct){
+    list.replaceChildren(el('div',{class:'notice'},
+      el('b',{text:'Link tanpa akun tidak tersimpan. '}),'Kamu tetap bisa membuat link dan membagikannya, tapi tidak bisa mengedit, menghapus, atau melihat statistiknya nanti. Masuk atau daftar untuk menyimpan semua link-mu.',
+      el('div',{class:'actions',style:'margin-top:10px'},
+        el('button',{type:'button',class:'btn sm primary',onclick:function(){S.authMode='login';go('masuk');}},'Masuk'),
+        el('button',{type:'button',class:'btn sm',onclick:function(){S.authMode='register';go('masuk');}},'Daftar'))));
+    return;
+  }
+  var all=Array.from(S.metas.values());
+  var rows=all.filter(isMine);
+  var q=(S.q||'').trim().toLowerCase();
+  if(q)rows=rows.filter(function(m){return (m.title||'').toLowerCase().indexOf(q)>-1||m.slug.indexOf(q)>-1;});
+  rows.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var nodes=[];
+  if(!S.dbChecked||(S.db&&!S.listReady))nodes.push(el('div',{class:'empty',text:S.net==='slow'?'Penyimpanan belum menjawab. Daftar akan muncul begitu tersambung.':'Memuat daftar…'}));
+  else if(!S.db)nodes.push(el('div',{class:'empty',text:'Daftar tidak tersedia karena penyimpanan belum tersambung.'}));
+  else if(!rows.length)nodes.push(el('div',{class:'empty',text:q?'Tidak ada paste yang cocok.':'Kamu belum membuat paste. Tempel link di form, lalu klik Pastekan Sekarang.'}));
+  else{
+    rows.slice(0,S.shown).forEach(function(m){
+      var a=S.agg[m.slug], st=statusOf(m);
+      nodes.push(el('button',{type:'button',class:'item',onclick:function(){go(m.slug);}},
+        fav(m.title||m.slug),
+        el('div',{class:'ib'},el('div',{class:'t',text:m.title||('Paste '+m.slug)}),
+          el('div',{class:'s'},el('span',{class:'mono',text:'#'+m.slug}),
+            el('span',{text:m.mode==='text'?'teks':nf(m.linkCount)+' link'}),
+            m.locked?el('span',{class:'chip warn'},icon('lock',11),'terkunci'):null,
+            a?el('span',{text:nf(a.total)+' dilihat'}):null,el('span',{text:ago(m.createdAt)}),
+            st[0]==='bad'?el('span',{class:'chip bad',text:st[1]}):null))));
+    });
+    if(rows.length>S.shown)nodes.push(el('button',{type:'button',class:'btn',text:'Tampilkan lebih banyak',onclick:function(){S.shown+=20;renderRail();}}));
+  }
+  list.replaceChildren.apply(list,nodes);
+}
+
+/* ---------- panel: dashboard & kelola ---------- */
+function pageHead(crumb,title,desc,actions){
+  return el('div',{class:'phead'},el('div',{class:'crumb',text:'Pastekan Linkmu / Panel / '+crumb}),el('h1',{text:title}),desc?el('p',{text:desc}):null,actions?el('div',{class:'actions'},actions):null);
+}
+function svgEl(tag,attrs){var n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in attrs)n.setAttribute(k,String(attrs[k]));return n;}
+function barChart(vals,labels){
+  var W=560,H=230,L=34,B=30,T=24,R=8, max=Math.max.apply(null,vals), ymax=max<4?4:Math.ceil(max/4)*4;
+  var svg=svgEl('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Grafik kunjungan 7 hari terakhir',class:'chart'});
+  [0,ymax/2,ymax].forEach(function(t){
+    var y=T+(H-T-B)*(1-t/ymax);
+    svg.append(svgEl('line',{x1:L,x2:W-R,y1:y,y2:y,class:'gl'}));
+    var tx=svgEl('text',{x:L-8,y:y+4,'text-anchor':'end',class:'ax'}); tx.textContent=String(t); svg.append(tx);
+  });
+  var n=vals.length, slot=(W-L-R)/n, bw=Math.min(38,slot*.56);
+  vals.forEach(function(v,i){
+    var h=(H-T-B)*v/ymax, x=L+slot*i+(slot-bw)/2, y=H-B-h;
+    if(v)svg.append(svgEl('rect',{x:x,y:y,width:bw,height:Math.max(h,3),rx:6,class:i===n-1?'bar today':'bar'}));
+    if(v){var vt=svgEl('text',{x:x+bw/2,y:y-7,'text-anchor':'middle',class:'bv'});vt.textContent=String(v);svg.append(vt);}
+    var lt=svgEl('text',{x:x+bw/2,y:H-10,'text-anchor':'middle',class:'ax'});lt.textContent=labels[i];svg.append(lt);
+  });
+  return svg;
+}
+function kpi(c,label,value,badge,sub,ic){
+  var k=el('div',{class:'card kpi'},el('span',{class:'kic'},icon(ic,34)),el('div',{class:'kl',text:label}),
+    el('div',{class:'kv'},el('b',{text:value}),badge),el('div',{class:'ks',text:sub}));
+  k.style.setProperty('--c','var(--'+c+')'); return k;
+}
+function needLogin(what,slug){
+  S.cur=null;
+  $('#main').replaceChildren(el('section',{class:'card authbox'},
+    el('div',{class:'authart'},icon('user',26)),
+    el('h1',{text:what+' khusus pemilik akun'}),
+    el('p',{style:'color:var(--muted);font-size:14px;margin:0 0 14px',text:'Masuk atau daftar dulu untuk menyimpan link, mengelolanya, dan melihat statistik. Tanpa akun kamu tetap bisa membuat link, tapi tidak tersimpan.'}),
+    el('div',{class:'actions'},
+      el('button',{type:'button',class:'btn primary lg',onclick:function(){S.next=slug;S.authMode='login';go('masuk');}},'Masuk'),
+      el('button',{type:'button',class:'btn lg',onclick:function(){S.next=slug;S.authMode='register';go('masuk');}},'Daftar'))));
+}
+function renderDash(){
+  if(!S.acct)return needLogin('Dashboard','dashboard');
+  S.cur=null; loadStats();
+  var main=$('#main'), nodes=[];
+  var actions=[el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('list',16),'Kelola Tautan'),el('button',{type:'button',class:'btn light',onclick:function(){go('buat');}},icon('plus',16),'Buat Paste Baru')];
+  nodes.push(pageHead('Dashboard','Dashboard','Ringkasan kunjungan harian, tren 7 hari, dan tautan terpopuler milikmu.',actions));
+  if(S.dbChecked&&!S.db){
+    nodes.push(el('div',{class:'notice warn'},'Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini untuk melihat dashboard.'));
+    main.replaceChildren.apply(main,nodes); return;
+  }
+  var mine=Array.from(S.metas.values()).filter(isMine), slugs={}; mine.forEach(function(m){slugs[m.slug]=m;});
+  var days=lastDays(7), per={}; days.forEach(function(d){per[d.key]=0;});
+  var week={}, feed=[];
+  S.hits.forEach(function(h){
+    if(!slugs[h.slug])return;
+    if(per[h.day]!=null){per[h.day]+=Number(h.n)||0; week[h.slug]=(week[h.slug]||0)+(Number(h.n)||0);}
+    feed.push(h);
+  });
+  var vals=days.map(function(d){return per[d.key];}), today=vals[6], yest=vals[5], sum=vals.reduce(function(a,b){return a+b;},0);
+  var now=Date.now(), active=mine.filter(function(m){return !expiryOf(m)||expiryOf(m)>now;}).length;
+  var total=0; mine.forEach(function(m){total+=(S.agg[m.slug]?S.agg[m.slug].total:0);});
+  var name=S.acct||'Tamu';
+  nodes.push(el('section',{class:'card'},el('div',{class:'hello'},
+    el('div',{class:'avatar',text:name.slice(0,2).toUpperCase()}),
+    el('div',{class:'tx'},el('h2',null,'Halo, '+name+'! ',el('span',{class:'chip info',text:S.acct?'Pengguna':'Tanpa akun'})),
+      el('p',{text:new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · pantau paste aktifmu'})),
+    el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('grid',16),'Semua Tautan'))));
+  if(!S.acct)nodes.push(el('div',{class:'notice'},'Kamu belum masuk, jadi dashboard hanya menampilkan paste yang dibuat dari perangkat ini. ',el('a',{href:'#masuk',style:'font-weight:700;text-decoration:underline',onclick:function(e){e.preventDefault();S.authMode='register';go('masuk');}},'Daftar atau masuk'),' supaya paste terhubung ke akunmu.'));
+  var delta=null;
+  if(yest>0){var pc=Math.round((today-yest)/yest*100); delta=el('span',{class:'chip '+(pc>=0?'ok':'bad')},icon(pc>=0?'up':'down',13),(pc>0?'+':'')+pc+'%');}
+  nodes.push(el('div',{class:'kgrid'},
+    kpi('ci4','Trafik hari ini',nf(today),delta||el('span',{class:'chip',text:'dibuka'}),yest>0?'dibanding kemarin ('+nf(yest)+')':'belum ada data kemarin','up'),
+    kpi('ci1','Trafik 7 hari',nf(sum),el('span',{class:'chip info',text:'7 hari'}),'Rata-rata ≈ '+nf(Math.round(sum/7))+' kunjungan per hari','clock'),
+    kpi('ci2','Total tautan',nf(mine.length),el('span',{class:'chip ok'},el('i'),nf(active)+' aktif'),'Total dibuka: '+nf(total)+' kali','file')));
+  nodes.push(el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('chart',17)),'Tren trafik 7 hari terakhir'),
+    el('p',{class:'ks',style:'margin:-6px 0 12px;color:var(--muted);font-size:13px',text:'Jumlah pembukaan paste milikmu per hari. Satu orang yang membuka lagi di hari yang sama ikut dihitung.'}),
+    sum?barChart(vals,days.map(function(d){return d.label;})):el('div',{class:'empty',text:'Belum ada kunjungan dalam 7 hari terakhir. Bagikan alamat pastemu untuk mulai melihat grafik.'})));
+  var top=mine.slice().sort(function(a,b){return ((S.agg[b.slug]?S.agg[b.slug].total:0)-(S.agg[a.slug]?S.agg[a.slug].total:0))||b.createdAt-a.createdAt;}).slice(0,6);
+  var rank=el('div',{class:'rank'});
+  if(!top.length)rank.append(el('div',{class:'empty',text:'Belum ada paste. Buat paste pertamamu untuk mengisi daftar ini.'}));
+  top.forEach(function(m){
+    var st=statusOf(m), a=S.agg[m.slug];
+    rank.append(el('div',{class:'rrow'},el('span',{class:'rno',text:String(rank.children.length+1)}),
+      el('div',{class:'rb'},el('div',{class:'rt',text:m.title||('Paste '+m.slug)}),
+        el('div',{class:'rs'},el('span',{class:'chip mono',text:'#'+m.slug}),el('span',{class:'chip '+st[0]},st[0]==='ok'?el('i'):null,st[1]),el('span',{text:nf(a?a.total:0)+' dibuka · '+nf(week[m.slug]||0)+' minggu ini'}))),
+      el('div',{class:'ra'},
+        el('button',{type:'button',class:'btn sm','aria-label':'Salin alamat '+m.slug,onclick:function(){copyText(shortLink(m.slug),'Alamat tersalin');}},icon('copy',14)),
+        el('button',{type:'button',class:'btn sm',onclick:function(){go(m.slug);}},'Buka'))));
+  });
+  nodes.push(el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('star',17)),'Tautan berkinerja terbaik'),rank,
+    el('div',{style:'margin-top:14px'},el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},'Lihat semua tautan'))));
+  feed.sort(function(a,b){return (b.last||0)-(a.last||0);});
+  var frows=feed.slice(0,6).map(function(h){var m=slugs[h.slug];
+    return el('div',{class:'frow'},el('div',{class:'fl'},el('b',{text:m.title||('Paste '+m.slug)}),el('span',{class:'mono',text:'#'+m.slug+' · '+nf(h.n)+' kali dibuka'})),el('div',{class:'fr',text:ago(h.last||Date.now())}));});
+  nodes.push(el('section',{class:'card'},el('div',{class:'live'},el('h2',{style:'margin:0'},el('span',{class:'dot'}),'Kunjungan terkini'),el('span',{class:'chip ok',text:'Langsung'})),
+    el('div',{class:'feed',style:'margin-top:12px'},frows.length?frows:[el('div',{class:'empty',text:'Belum ada kunjungan terbaru.'})])));
+  nodes.push(el('section',{class:'card inv'},el('span',{class:'chip info',text:'Inventaris tautan'}),el('h2',{text:'Kelola seluruh koleksi tautan'}),
+    el('p',{text:'Cari, edit, salin alamat, atau hapus paste dari satu halaman.'}),
+    el('button',{type:'button',class:'btn primary lg block',onclick:function(){go('kelola');}},'Buka Manajemen Tautan ('+nf(mine.length)+')')));
+  var wrap=el('div',{class:'dash'},nodes.slice(1));
+  main.replaceChildren(nodes[0],wrap);
+}
+function renderManage(){
+  if(!S.acct)return needLogin('Kelola Tautan','kelola');
+  S.cur=null; loadStats();
+  var q=el('input',{id:'m-q',class:'inp',type:'search',placeholder:'Cari judul atau alamat','aria-label':'Cari tautan',value:S.mq||null});
+  q.addEventListener('input',function(){S.mq=q.value;updateManage();});
+  var fs=[['all','Semua'],['active','Aktif'],['locked','Terkunci'],['expired','Kedaluwarsa']];
+  var seg=el('div',{class:'seg',role:'radiogroup','aria-label':'Filter status'},fs.map(function(f){
+    var b=el('button',{type:'button',role:'radio','aria-checked':String(S.mf===f[0]),text:f[1]});
+    b.addEventListener('click',function(){S.mf=f[0];Array.from(seg.children).forEach(function(c,i){c.setAttribute('aria-checked',String(fs[i][0]===S.mf));});updateManage();});
+    return b;}));
+  $('#main').replaceChildren(
+    pageHead('Kelola Tautan','Kelola Tautan','Semua paste yang kamu buat ada di sini. Cari, salin alamat, edit, atau hapus.',[el('button',{type:'button',class:'btn',onclick:function(){go('dashboard');}},icon('chart',16),'Dashboard'),el('button',{type:'button',class:'btn light',onclick:function(){go('buat');}},icon('plus',16),'Buat Paste Baru')]),
+    el('section',{class:'card'},el('div',{class:'mtools'},q,seg),el('div',{class:'list',id:'mlist'})));
+  updateManage();
+}
+function updateManage(){
+  var list=$('#mlist'); if(!list)return;
+  if(S.dbChecked&&!S.db){list.replaceChildren(el('div',{class:'empty',text:'Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini.'}));return;}
+  if(!S.listReady){list.replaceChildren(el('div',{class:'empty',text:'Memuat daftar…'}));return;}
+  var rows=Array.from(S.metas.values()).filter(isMine).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}), q=(S.mq||'').trim().toLowerCase();
+  if(q)rows=rows.filter(function(m){return (m.title||'').toLowerCase().indexOf(q)>-1||m.slug.indexOf(q)>-1;});
+  if(S.mf==='active')rows=rows.filter(function(m){return !isExpired(m)&&!m.locked;});
+  else if(S.mf==='locked')rows=rows.filter(function(m){return m.locked&&!isExpired(m);});
+  else if(S.mf==='expired')rows=rows.filter(isExpired);
+  if(!rows.length){list.replaceChildren(el('div',{class:'empty',text:(q||S.mf!=='all')?'Tidak ada tautan yang cocok.':'Kamu belum membuat paste. Klik Buat Paste Baru untuk mulai.'}));return;}
+  list.replaceChildren.apply(list,rows.map(function(m){
+    var st=statusOf(m), a=S.agg[m.slug], exp=expiryOf(m);
+    var del=el('button',{type:'button',class:'btn sm danger'},icon('trash',14),el('span',{text:'Hapus'})), armed=false, t=null;
+    del.addEventListener('click',function(){
+      if(!armed){armed=true;del.lastChild.textContent='Yakin hapus?';t=setTimeout(function(){armed=false;del.lastChild.textContent='Hapus';},4000);return;}
+      clearTimeout(t); del.disabled=true;
+      removePaste(m.slug).then(function(){toast('Paste dihapus');}).catch(function(){del.disabled=false;toast('Gagal menghapus');});
+    });
+    return el('div',{class:'mrow'},fav(m.title||m.slug),
+      el('div',{class:'rb'},el('div',{class:'rt',style:'font-weight:700;overflow-wrap:anywhere',text:m.title||('Paste '+m.slug)}),
+        el('div',{class:'rs',style:'display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:4px'},
+          el('span',{class:'chip mono',text:'#'+m.slug}),el('span',{class:'chip '+st[0]},st[0]==='ok'?el('i'):null,st[1]),
+          el('span',{text:m.mode==='text'?'teks':nf(m.linkCount)+' link'}),el('span',{text:nf(a?a.total:0)+' dilihat'}),el('span',{text:ago(m.createdAt)}),
+          exp&&exp>Date.now()?el('span',{text:left(exp)}):null)),
+      el('div',{class:'actions'},
+        el('button',{type:'button',class:'btn sm',onclick:function(){go(m.slug);}},icon('ext',14),'Buka'),
+        el('button',{type:'button',class:'btn sm','aria-label':'Salin alamat '+m.slug,onclick:function(){copyText(shortLink(m.slug),'Alamat tersalin');}},icon('copy',14)),
+        el('button',{type:'button',class:'btn sm',onclick:function(){S.wantEdit=m.slug;go(m.slug);}},icon('edit',14),'Edit'),del));
+  }));
+}
+
+/* ---------- halaman info ---------- */
+var INFO={
+  ketentuan:['Ketentuan Layanan',[
+    ['Penggunaan','Pastekan Linkmu dipakai untuk menyimpan dan membagikan teks atau daftar link. Gunakan dengan wajar dan jangan menyimpan konten ilegal, penipuan, atau yang melanggar hak orang lain.'],
+    ['Konten','Kamu bertanggung jawab atas isi paste yang kamu buat. Pembuat paste dan pemilik halaman ini dapat menghapus paste kapan saja.'],
+    ['Ketersediaan','Layanan diberikan apa adanya. Paste yang kedaluwarsa tidak bisa dibuka lagi, dan sandi yang hilang tidak bisa dipulihkan.']]],
+  privasi:['Kebijakan Privasi',[
+    ['Yang disimpan','Isi paste (terenkripsi jika diberi sandi), judul, alamat, waktu pembuatan, penanda pembuat, serta hitungan dibuka per hari.'],
+    ['Sandi','Sandi paste tidak pernah disimpan dan hanya diproses di browser. Sandi akun dikelola oleh Firebase Authentication.'],
+    ['Siapa yang melihat','Paste dapat dibuka oleh siapa saja yang punya alamatnya. Untuk paste bersandi, judul, alamat, dan jumlah link tetap terlihat; isinya tidak.']]],
+  tentang:['Tentang Kami',[
+    ['Pastekan Linkmu','Layanan kecil untuk menyimpan teks atau daftar link, lalu membagikannya lewat satu alamat pendek, lengkap dengan sandi, masa berlaku, kode QR, dan statistik kunjungan.'],
+    ['Cara kerjanya','Situs statis di Firebase Hosting dengan Cloud Firestore untuk data dan Firebase Authentication untuk akun, sehingga tidak membutuhkan server sendiri.']]]
+};
+function renderInfo(k){
+  S.cur=null; var d=INFO[k]||INFO.tentang;
+  $('#main').replaceChildren(pageHead(d[0],d[0],null),
+    el('section',{class:'card prose'},d[1].map(function(s){return el('div',null,el('h2',{text:s[0]}),el('p',{text:s[1]}));})));
+}
+
+/* ---------- lihat paste ---------- */
+function saveTxt(name,text){
+  try{
+    var url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+    var a=el('a',{href:url,download:name}); document.body.append(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000); toast('File diunduh');
+  }catch(e){toast('Tidak bisa mengunduh file');}
+}
+function showQR(link){
+  if(typeof QRCode==='undefined'){toast('QR belum tersedia');return;}
+  var box=el('div',{class:'qrbox'}), ov=$('#overlay');
+  function close(){ov.replaceChildren();document.removeEventListener('keydown',onKey);}
+  function onKey(e){if(e.key==='Escape')close();}
+  var modal=el('div',{class:'modal',role:'dialog','aria-modal':'true','aria-label':'Kode QR'},
+    el('div',{class:'wm',style:'font-size:18px',text:'Kode QR'}),box,
+    el('div',{class:'mono tg',style:'overflow-wrap:anywhere',text:link}),
+    el('div',{style:'height:12px'}),el('button',{type:'button',class:'btn',text:'Tutup',onclick:close}));
+  var wrap=el('div',{class:'ov',onclick:function(e){if(e.target===wrap)close();}},modal);
+  ov.replaceChildren(wrap); document.addEventListener('keydown',onKey);
+  try{new QRCode(box,{text:link,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}
+  catch(e){close();toast('QR tidak bisa dibuat');}
+}
+function viewShell(children,band){
+  $('#main').replaceChildren(
+    el('button',{type:'button',class:'btn sm back',onclick:function(){go('');}},icon('back',16),'Beranda'),
+    el('section',{class:band?'card vcard':'card'},children));
+}
+function stateCard(titleText,msg,extra){
+  viewShell([el('div',{class:'vhead'},el('h1',{text:titleText})),el('p',{style:'color:var(--muted);margin:0 0 14px',text:msg}),extra||null]);
+}
+function renderView(){
+  var cur=S.cur; if(!cur)return;
+  var st=cur.status;
+  if(st==='loading'){viewShell(el('div',{class:'empty',text:'Membuka paste…'}));return;}
+  if(st==='offline'){stateCard('Belum tersambung','Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini untuk membuka paste.');return;}
+  if(st==='notfound'){stateCard('Paste tidak ditemukan','Alamat #'+S.slug+' tidak ada. Mungkin salah ketik, sudah dihapus, atau kamu belum punya akses ke halaman ini.');return;}
+  if(st==='error'){stateCard('Gagal membuka','Paste tidak bisa dimuat sekarang. Coba muat ulang sebentar lagi.');return;}
+  var meta=cur.meta;
+  if(st==='expired'){
+    var ex=null;
+    if(canManage(meta))ex=el('button',{type:'button',class:'btn danger',onclick:function(){removePaste(meta.slug).then(function(){toast('Paste dihapus');go('');}).catch(function(){toast('Gagal menghapus');});}},icon('trash',16),'Hapus paste ini');
+    stateCard(meta.title||('Paste '+meta.slug),'Paste ini sudah kedaluwarsa dan tidak bisa dibuka lagi.',ex);return;
+  }
+  var head=el('div',{class:'vhead'},el('h1',{text:meta.title||('Paste '+meta.slug)}));
+  var exp=expiryOf(meta);
+  var chips=el('div',{class:'meta'},
+    el('span',{class:'chip',text:'dibuat '+ago(meta.createdAt)}),
+    el('span',{class:'chip info',id:'vc',text:viewsText(meta.slug)}),
+    el('span',{class:'chip',text:meta.mode==='text'?'teks':nf(meta.linkCount)+' link'}),
+    meta.locked?el('span',{class:'chip warn'},icon('lock',12),'terkunci'):null,
+    exp?el('span',{class:'chip warn',text:left(exp)}):null);
+  if(st==='locked'){
+    var pw=el('input',{id:'lock-pwd',class:'inp',type:'password',placeholder:'Kata sandi',autocomplete:'current-password'});
+    function tryUnlock(){if(!pw.value)return;unlock(pw.value,false);}
+    pw.addEventListener('keydown',function(e){if(e.key==='Enter')tryUnlock();});
+    viewShell([el('div',{class:'vband'},head,chips),el('div',{class:'vbody'},el('div',{class:'lockbox stack'},
+      el('div',{class:'notice'},'Isi paste ini dikunci. Masukkan kata sandi untuk membukanya.'),
+      el('div',null,el('label',{for:'lock-pwd',text:'Kata sandi'}),pw),
+      el('div',{class:'err',id:'lock-err',role:'alert'}),
+      el('div',{class:'actions'},el('button',{type:'button',class:'btn primary',onclick:tryUnlock},icon('lock',16),'Buka isi'))))],true);
+    return;
+  }
+  if(S.wantEdit===meta.slug&&canManage(meta)){S.editing=true;S.wantEdit='';}
+  if(S.editing&&canManage(meta)){
+    viewShell([el('div',{class:'vband'},head,chips),el('div',{class:'vbody'},buildComposer({meta:meta,text:cur.text,pwd:cur.pwd||S.pwds.get(meta.slug)||''}))],true);return;
+  }
+  var link=shortLink(meta.slug), text=cur.text, items=parseItems(text);
+  var short=el('input',{class:'inp',type:'text',readonly:true,value:link,'aria-label':'Alamat pendek'});
+  short.addEventListener('focus',function(){short.select();});
+  var shareText=(meta.title?meta.title+' ':'')+link;
+  var created=(S.flash==='created'&&S.flashSlug===meta.slug);
+  var banner=created?el('div',{class:'notice good',style:'margin-bottom:14px'},'Paste berhasil dibuat. Salin alamat di bawah dan bagikan.'):null;
+  if(created&&!S.acct&&isMine(meta))banner.append(
+    el('div',{style:'margin-top:8px',text:'Link ini belum tersimpan di akun, jadi nanti tidak bisa diedit, dihapus, atau dilihat statistiknya. Daftar atau masuk dengan Google sekarang supaya link ini jadi milik akunmu.'}),
+    el('div',{class:'actions',style:'margin-top:10px'},el('button',{type:'button',class:'btn sm primary',onclick:function(){S.next=meta.slug;S.authMode='register';go('masuk');}},'Daftar atau masuk')));
+  var shortbox=el('div',{class:'shortbox'},short,
+    el('button',{type:'button',class:'btn primary',onclick:function(){copyText(link,'Alamat tersalin');}},icon('copy',16),'Salin alamat'),
+    el('button',{type:'button',class:'btn','aria-label':'Tampilkan kode QR',onclick:function(){showQR(link);}},icon('qr',16),'QR'));
+  var share=el('div',{class:'sharebar'},
+    el('a',{class:'btn sm',target:'_blank',rel:'noopener noreferrer',href:'https://wa.me/?text='+encodeURIComponent(shareText)},icon('send',15),'WhatsApp'),
+    el('a',{class:'btn sm',target:'_blank',rel:'noopener noreferrer',href:'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(shareText)},icon('send',15),'Telegram'));
+  var allHrefs=items.filter(function(i){return i.t==='l';}).map(function(i){return i.href;});
+  var tools=el('div',{class:'actions'},
+    el('button',{type:'button',class:'btn sm',onclick:function(){copyText(meta.mode==='text'?text:allHrefs.join('\n'),meta.mode==='text'?'Teks tersalin':nf(allHrefs.length)+' link tersalin');}},icon('copy',15),meta.mode==='text'?'Salin teks':'Salin semua link'),
+    el('button',{type:'button',class:'btn sm',onclick:function(){saveTxt(meta.slug+'.txt',text);}},icon('download',15),'Unduh .txt'),
+    el('button',{type:'button',class:'btn sm','aria-pressed':String(S.raw),onclick:function(){S.raw=!S.raw;renderView();}},icon('raw',15),S.raw?'Tampilan rapi':'Teks mentah'));
+  if(canManage(meta)){
+    tools.append(el('button',{type:'button',class:'btn sm',onclick:function(){S.editing=true;renderView();}},icon('edit',15),'Edit'));
+    var del=el('button',{type:'button',class:'btn sm danger'},icon('trash',15),el('span',{text:'Hapus'})), armed=false, t=null;
+    del.addEventListener('click',function(){
+      if(!armed){armed=true;del.lastChild.textContent='Yakin hapus?';t=setTimeout(function(){armed=false;del.lastChild.textContent='Hapus';},4000);return;}
+      clearTimeout(t); del.disabled=true;
+      removePaste(meta.slug).then(function(){toast('Paste dihapus');go('');}).catch(function(){del.disabled=false;toast('Gagal menghapus');});
+    });
+    tools.append(del);
+  }
+  var content;
+  if(S.raw){content=el('pre',{class:'raw',text:text});}
+  else if(meta.mode==='text'){content=el('div',{class:'textbody'});linkify(content,text);}
+  else{
+    content=el('div',{class:'links'});
+    items.forEach(function(it){
+      if(it.t==='x'){content.append(el('h3',{class:'sect',text:it.text}));return;}
+      var u=splitUrl(it.href);
+      content.append(el('div',{class:'lrow'},
+        el('a',{class:'go',href:it.href,target:'_blank',rel:'noopener noreferrer nofollow'},fav(u.host),
+          el('span',{class:'tx'},el('span',{class:'lbl',text:it.label||u.host}),el('span',{class:'url'},el('b',{text:u.host}),u.rest)),icon('ext',16)),
+        el('button',{type:'button',class:'cp','aria-label':'Salin link '+u.host,onclick:function(){copyText(it.href,'Link tersalin');}},icon('copy',16))));
+    });
+  }
+  var menu=el('div',{class:'moremenu',id:'moremenu',hidden:!S.more},share,tools);
+  var moreBtn=el('button',{type:'button',class:'btn','aria-expanded':String(!!S.more),'aria-controls':'moremenu',onclick:function(){
+    S.more=!S.more; menu.hidden=!S.more; moreBtn.setAttribute('aria-expanded',String(S.more));
+  }},icon('more',16),'Lainnya');
+  shortbox.append(moreBtn);
+  viewShell([el('div',{class:'vband'},head,chips),el('div',{class:'vbody'},banner,shortbox,menu,el('div',{class:'sep'}),content)],true);
+}
+
+/* ---------- akun (Firebase Authentication) ---------- */
+function uerr(m){var e=new Error(m);e.user=true;return e;}
+function registerAcct(name,pwd){
+  var email=name+ACCT_DOMAIN, u=S.auth.currentUser, p;
+  if(u&&u.isAnonymous)p=u.linkWithCredential(firebase.auth.EmailAuthProvider.credential(email,pwd));
+  else p=S.auth.createUserWithEmailAndPassword(email,pwd);
+  return p.then(function(){applyUser(S.auth.currentUser);}).catch(function(e){
+    var c=e&&e.code;
+    if(c==='auth/email-already-in-use'||c==='auth/credential-already-in-use')throw uerr('Nama pengguna sudah dipakai. Pilih yang lain.');
+    if(c==='auth/weak-password')throw uerr('Kata sandi terlalu lemah. Pakai minimal 6 karakter.');
+    throw e;
+  });
+}
+function loginAcct(name,pwd){
+  return S.auth.signInWithEmailAndPassword(name+ACCT_DOMAIN,pwd).then(function(){applyUser(S.auth.currentUser);}).catch(function(e){
+    var c=e&&e.code;
+    if(c==='auth/user-not-found'||c==='auth/wrong-password'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials')throw uerr('Nama pengguna atau kata sandi salah.');
+    throw e;
+  });
+}
+/* Captcha Cloudflare Turnstile (gratis). Aktif hanya kalau firebase-config.js mengisi window.TURNSTILE_SITEKEY.
+   Catatan: tanpa server pemeriksa, ini penghalang di halaman saja, bukan perlindungan penuh. */
+function tsKey(){var k=window.TURNSTILE_SITEKEY;return (typeof k==='string'&&/^[0-9A-Za-z_-]{10,}$/.test(k)&&!/^ISI/i.test(k))?k:'';}
+var tsLoad=null;
+function tsScript(){
+  if(!tsLoad)tsLoad=new Promise(function(res,rej){
+    var s=el('script',{src:'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',async:true});
+    s.onload=res; s.onerror=function(){tsLoad=null;rej(new Error('ts'));}; document.head.append(s);
+  });
+  return tsLoad;
+}
+function captcha(){
+  var key=tsKey(); if(!key)return {node:null,ok:function(){return true;},reset:function(){}};
+  var box=el('div',{class:'capbox'}), token='', id=null, failed=false;
+  tsScript().then(function(){
+    if(!window.turnstile){failed=true;return;}
+    id=turnstile.render(box,{sitekey:key,theme:isDark()?'dark':'light',
+      callback:function(t){token=t;},'expired-callback':function(){token='';},'error-callback':function(){token='';}});
+  }).catch(function(){failed=true;});
+  /* Kalau skrip captcha gagal dimuat (mis. diblokir pemblokir iklan), pengguna tetap boleh lanjut. */
+  return {node:box,ok:function(){return failed||!!token;},reset:function(){token='';try{if(id!==null&&window.turnstile)turnstile.reset(id);}catch(e){}}};
+}
+function googleAuth(){
+  var prov=new firebase.auth.GoogleAuthProvider(), u=S.auth.currentUser, p;
+  prov.setCustomParameters&&prov.setCustomParameters({prompt:'select_account'});
+  p=(u&&u.isAnonymous)?u.linkWithPopup(prov):S.auth.signInWithPopup(prov);
+  return p.catch(function(e){
+    /* Akun Google ini sudah pernah dipakai: pindah ke akun itu (paste anonim yang belum tertaut tidak ikut pindah). */
+    if(e&&e.code==='auth/credential-already-in-use'&&e.credential)return S.auth.signInWithCredential(e.credential);
+    throw e;
+  }).then(function(){applyUser(S.auth.currentUser);});
+}
+function gIcon(){
+  var s=el('span',{style:'display:inline-flex;width:20px;height:20px','aria-hidden':'true'});
+  s.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+  return s;
+}
+function googleErr(e){
+  var c=e&&e.code;
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return 'Login Google dibatalkan.';
+  if(c==='auth/popup-blocked')return 'Jendela login diblokir browser. Izinkan popup untuk situs ini lalu coba lagi.';
+  if(c==='auth/operation-not-allowed')return 'Login Google belum diaktifkan di Firebase Authentication.';
+  if(c==='auth/unauthorized-domain')return 'Domain situs ini belum diizinkan di Firebase Authentication (Authorized domains).';
+  if(c==='auth/network-request-failed')return 'Koneksi bermasalah. Coba lagi.';
+  return 'Gagal masuk dengan Google. Coba lagi sebentar lagi.';
+}
+function setAcct(name){
+  if(!name&&S.auth)S.auth.signOut().catch(function(){toast('Gagal keluar');});
+}
+function renderAuth(){
+  S.cur=null; var mode=S.authMode;
+  var tabL=el('button',{type:'button',role:'tab',text:'Masuk'}), tabR=el('button',{type:'button',role:'tab',text:'Daftar'});
+  var user=el('input',{id:'a-user',class:'inp mono',type:'text',autocomplete:'username',autocapitalize:'off',spellcheck:'false',maxlength:'20',placeholder:'nama_pengguna'});
+  var pw=el('input',{id:'a-pwd',class:'inp',type:'password',autocomplete:'current-password',placeholder:'Kata sandi'});
+  var pw2=el('input',{id:'a-pwd2',class:'inp',type:'password',autocomplete:'new-password',placeholder:'Ulangi kata sandi'});
+  var pw2Wrap=el('div',null,el('label',{for:'a-pwd2',text:'Ulangi kata sandi'}),pw2);
+  var capWrap=el('div',null), cap=null;
+  var err=el('div',{class:'err',role:'alert'});
+  var btn=el('button',{type:'button',class:'btn primary lg'},'Masuk');
+  var title=el('h1',{text:'Masuk'}), sub=el('p',{style:'font-size:14px;margin:0 0 14px;color:var(--muted)'});
+  function setMode(m){
+    mode=m; S.authMode=m; tabL.setAttribute('aria-selected',String(m==='login')); tabR.setAttribute('aria-selected',String(m==='register'));
+    pw2Wrap.hidden=(m!=='register'); capWrap.hidden=(m!=='register');
+    if(m==='register'&&!cap&&tsKey()){cap=captcha(); capWrap.append(cap.node);}
+    pw.setAttribute('autocomplete',m==='login'?'current-password':'new-password');
+    title.textContent=m==='login'?'Masuk ke Pastekan Linkmu':'Buat akun Pastekan Linkmu';
+    sub.textContent=m==='login'?'Masuk supaya paste-mu terhubung ke akun dan mudah dicari di Dashboard.':'Pilih nama pengguna dan kata sandi. Akun tidak wajib: kamu tetap bisa membuat paste tanpa masuk.';
+    btn.textContent=m==='login'?'Masuk':'Daftar'; err.textContent='';
+  }
+  function submit(){
+    err.textContent='';
+    var name=user.value.trim().toLowerCase(), p=pw.value;
+    if(!S.db)return void(err.textContent='Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini.');
+    if(!/^[a-z0-9_]{3,20}$/.test(name))return void(err.textContent='Nama pengguna: 3–20 huruf kecil, angka, atau garis bawah.');
+    if(p.length<6)return void(err.textContent='Kata sandi minimal 6 karakter.');
+    if(mode==='register'&&p!==pw2.value)return void(err.textContent='Kata sandi dan ulangannya tidak sama.');
+    if(mode==='register'&&cap&&!cap.ok())return void(err.textContent='Selesaikan captcha dulu.');
+    btn.disabled=true;
+    (mode==='login'?loginAcct(name,p):registerAcct(name,p)).then(function(){
+      btn.disabled=false; S.authMode='login'; setAcct(name); toast(mode==='login'?'Berhasil masuk':'Akun dibuat, kamu sudah masuk'); var nx=S.next; S.next=''; go(nx||'dashboard');
+    }).catch(function(e){
+      btn.disabled=false; if(cap)cap.reset(); var c=e&&e.code;
+      err.textContent=e&&e.user?e.message:c==='auth/operation-not-allowed'?'Metode masuk Email/Password belum diaktifkan di Firebase Authentication.':c==='auth/network-request-failed'?'Koneksi bermasalah. Coba lagi.':'Gagal memproses. Coba lagi sebentar lagi.';
+    });
+  }
+  tabL.addEventListener('click',function(){setMode('login');}); tabR.addEventListener('click',function(){setMode('register');});
+  btn.addEventListener('click',submit);
+  [user,pw,pw2].forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});});
+  var gBtn=el('button',{type:'button',class:'btn lg gbtn'},gIcon(),el('span',{text:'Lanjut dengan Google'}));
+  gBtn.addEventListener('click',function(){
+    err.textContent='';
+    if(!S.db)return void(err.textContent='Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini.');
+    gBtn.disabled=true;
+    googleAuth().then(function(){
+      gBtn.disabled=false; S.authMode='login'; toast('Berhasil masuk dengan Google'); var nx=S.next; S.next=''; go(nx||'dashboard');
+    }).catch(function(e){gBtn.disabled=false; err.textContent=googleErr(e);});
+  });
+  var body;
+  if(S.acct){
+    body=[el('div',{class:'authart'},icon('user',26)),el('h1',{text:'Kamu sudah masuk'}),el('p',{style:'font-size:14px;margin:0 0 14px;color:var(--muted)',text:'Masuk sebagai @'+S.acct+'. Paste yang kamu buat sekarang terhubung ke akun ini.'}),
+      el('div',{class:'actions'},el('button',{type:'button',class:'btn primary',onclick:function(){go('dashboard');}},'Ke Dashboard'),el('button',{type:'button',class:'btn',onclick:function(){setAcct('');}},'Keluar'))];
+  }else{
+    body=[el('div',{class:'authart'},icon('user',26)),title,sub,el('div',{class:'tabs',role:'tablist',style:'margin-top:0'},tabL,tabR),
+      el('div',{class:'stack'},
+        el('div',null,el('label',{for:'a-user',text:'Nama pengguna'}),user),
+        el('div',null,el('label',{for:'a-pwd',text:'Kata sandi'}),pw),
+        pw2Wrap,capWrap,err,
+        el('div',{class:'actions'},btn,el('button',{type:'button',class:'btn lg',text:'Lanjut tanpa akun',onclick:function(){go('');}})),
+        el('div',{class:'hint',style:'text-align:center',text:'atau'}),
+        gBtn,
+        el('div',{class:'notice',text:'Akun nama pengguna tidak memakai email, jadi kata sandi yang lupa tidak bisa direset. Dengan Google, kamu tidak perlu mengingat kata sandi. Paste yang dibuat sebelum kamu masuk ke akun lain yang sudah ada tidak ikut pindah.'}))];
+    setMode(mode);
+  }
+  $('#main').replaceChildren(el('section',{class:'card authbox'},body));
+}
+
+/* ---------- iklan ---------- */
+function httpsOnly(u){u=String(u||'').trim();return /^https:\/\/\S+$/i.test(u)?u:'';}
+function adHeight(s){return Math.max(50,Math.min(600,Number(s&&s.h)||100));}
+function adNode(s){
+  if(!s)return null;
+  var code=String(s.code||'').trim(), img=httpsOnly(s.img), href=httpsOnly(s.href), box=null;
+  var data=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(String(s.data||''))?s.data:'';
+  if(code){
+    box=el('iframe',{title:'Iklan',loading:'lazy',referrerpolicy:'no-referrer',scrolling:'no',
+      sandbox:'allow-scripts allow-popups allow-popups-to-escape-sandbox',style:'height:'+adHeight(s)+'px'});
+    box.srcdoc='<!doctype html><meta charset="utf-8"><base target="_blank"><style>html,body{margin:0;background:transparent}</style>'+code;
+  }else if(img||data){
+    var im=el('img',{src:data||img,alt:'Iklan',loading:'lazy',referrerpolicy:'no-referrer'});
+    box=href?el('a',{href:href,target:'_blank',rel:'sponsored noopener noreferrer nofollow'},im):el('div',{class:'adimg'},im);
+  }
+  return box?el('div',{class:'adslot'},el('div',{class:'adtag',text:'Iklan'}),box):null;
+}
+function renderAds(){
+  var on=!!(S.ads&&S.ads.on)&&S.slug!=='admin';
+  var key=on?JSON.stringify([S.ads.top||null,S.ads.bottom||null]):'';
+  var slots=[['top','#adtop'],['bottom','#adbot']];
+  if(key!==S.adKey){
+    S.adKey=key;
+    slots.forEach(function(p){
+      var host=$(p[1]); if(!host)return;
+      var n=on?adNode(S.ads[p[0]]):null;
+      host.replaceChildren(); if(n)host.append(n);
+      host.parentNode.hidden=!n;
+    });
+  }
+}
+function loadAds(){
+  if(!S.db)return; S.adsAsked=true;
+  S.db.collection('settings').doc('ads').get().then(function(s){S.ads=s.exists?s.data():null;S.adKey='#';renderAds();}).catch(function(){S.adsAsked=false;});
+}
+
+/* ---------- admin ---------- */
+/* Kecilkan gambar pilihan galeri jadi JPEG berukuran kecil (maks. ±180 KB) supaya muat di Firestore. */
+function shrinkImage(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      URL.revokeObjectURL(url);
+      var w0=im.naturalWidth,h0=im.naturalHeight; if(!w0||!h0)return rej(new Error('kosong'));
+      var maxW=1000,q=0.82;
+      for(var i=0;i<14;i++){
+        var w=Math.min(w0,maxW),h=Math.max(1,Math.round(h0*w/w0)),c=document.createElement('canvas'); c.width=w; c.height=h;
+        var g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,w,h); g.drawImage(im,0,0,w,h);
+        var out=c.toDataURL('image/jpeg',q);
+        if(out.length<=180000)return res(out);
+        if(q>0.5)q-=0.1; else maxW=Math.round(maxW*0.8);
+      }
+      rej(new Error('besar'));
+    };
+    im.onerror=function(){URL.revokeObjectURL(url);rej(new Error('rusak'));};
+    im.src=url;
+  });
+}
+function adminCard(children){$('#main').replaceChildren(el('section',{class:'card authbox'},children));}
+function renderAdmin(){
+  S.cur=null;
+  if(!S.db){adminCard([el('h1',{text:'Admin'}),el('p',{style:'color:var(--muted)',text:'Penyimpanan belum tersambung. Muat ulang halaman ini.'})]);return;}
+  if(!S.acct){
+    adminCard([el('div',{class:'authart'},icon('shield',26)),el('h1',{text:'Login Admin'}),
+      el('p',{style:'font-size:14px;margin:0 0 14px;color:var(--muted)',text:'Masuk dengan akun admin untuk mengatur iklan. Kalau belum punya akun, daftar dulu, lalu jadikan admin.'}),
+      el('div',{class:'actions'},
+        el('button',{type:'button',class:'btn primary',onclick:function(){S.next='admin';S.authMode='login';go('masuk');}},'Masuk'),
+        el('button',{type:'button',class:'btn',onclick:function(){S.next='admin';S.authMode='register';go('masuk');}},'Daftar'))]);
+    return;
+  }
+  if(S.isAdmin===null){
+    adminCard([el('h1',{text:'Admin'}),el('p',{style:'color:var(--muted)',text:'Memeriksa akses…'})]);
+    var uid=S.uid;
+    S.db.collection('admins').doc(uid).get().then(function(s){
+      if(S.uid!==uid)return; S.isAdmin=!!s.exists; if(S.slug==='admin')renderAdmin();
+    }).catch(function(){
+      if(S.uid!==uid)return; S.isAdmin=false; if(S.slug==='admin')renderAdmin();
+    });
+    return;
+  }
+  if(!S.isAdmin){
+    adminCard([el('div',{class:'authart'},icon('lock',26)),el('h1',{text:'Akun ini belum jadi admin'}),
+      el('p',{style:'font-size:14px;margin:0 0 12px;color:var(--muted)',text:'Masuk sebagai @'+S.acct+'. Salin ID akun di bawah, lalu daftarkan di Firebase:'}),
+      el('div',{class:'uidbox',id:'uid-box',text:S.uid}),
+      el('div',{style:'height:10px'}),
+      el('button',{type:'button',class:'btn',onclick:function(){copyText(S.uid,'ID akun tersalin');}},icon('copy',16),'Salin ID akun'),
+      el('div',{style:'height:14px'}),
+      el('div',{class:'notice'},
+        'Di konsol Firebase buka Firestore Database > Data > Start collection. Isi Collection ID ',el('b',{text:'admins'}),
+        ', Document ID tempel ID akun tadi, tambah satu field bernama ',el('b',{text:'aktif'}),' bertipe boolean bernilai true, lalu Save. Setelah itu muat ulang halaman ini.'),
+      el('div',{style:'height:14px'}),
+      el('button',{type:'button',class:'btn',onclick:function(){S.isAdmin=null;renderAdmin();}},'Periksa lagi')]);
+    return;
+  }
+  renderAdminPanel();
+}
+function renderAdminPanel(){
+  var cfg=S.ads||{}, on=!!cfg.on;
+  var sw=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(on)},el('span',{text:'Tampilkan iklan di situs'}),el('span',{class:'knob'}));
+  sw.addEventListener('click',function(){on=!on;sw.setAttribute('aria-checked',String(on));});
+  function slotBox(key,title){
+    var d=cfg[key]||{};
+    var img=el('input',{class:'inp',type:'url',inputmode:'url',autocomplete:'off',autocapitalize:'off',spellcheck:'false',placeholder:'https://…/banner.jpg',value:d.img||''});
+    var href=el('input',{class:'inp',type:'url',inputmode:'url',autocomplete:'off',autocapitalize:'off',spellcheck:'false',placeholder:'https://tujuan-iklan.com',value:d.href||''});
+    var dataUrl=/^data:image\//.test(String(d.data||''))?d.data:'';
+    var pick=el('input',{type:'file',accept:'image/*',style:'display:none','aria-hidden':'true',tabindex:'-1'});
+    var pickBtn=el('button',{type:'button',class:'btn'},icon('plus',16),'Pilih dari galeri');
+    var clrBtn=el('button',{type:'button',class:'btn sm danger'},icon('trash',15),'Hapus gambar');
+    var code=el('textarea',{class:'inp',spellcheck:'false',autocapitalize:'off',autocomplete:'off',placeholder:'Tempel kode iklan dari jaringan iklan (opsional)',style:'min-height:110px'});
+    code.value=d.code||'';
+    var h=el('input',{class:'inp',type:'number',inputmode:'numeric',min:'50',max:'600',value:String(d.h||100)});
+    var prev=el('div',{class:'adprev'}), t=null;
+    function paint(){clearTimeout(t);t=setTimeout(function(){
+      var n=adNode({img:img.value,data:dataUrl,href:href.value,code:code.value,h:h.value}); prev.replaceChildren(); if(n)prev.append(n);
+    },400);}
+    clrBtn.hidden=!dataUrl;
+    pickBtn.addEventListener('click',function(){pick.click();});
+    pick.addEventListener('change',function(){
+      var f=pick.files&&pick.files[0]; if(!f)return;
+      pickBtn.disabled=true; pickBtn.lastChild.textContent='Memproses…';
+      shrinkImage(f).then(function(u){
+        dataUrl=u; img.value=''; clrBtn.hidden=false; paint(); toast('Gambar siap ('+Math.round(u.length/1024)+' KB). Tekan Simpan.');
+      }).catch(function(){toast('Gambar tidak bisa dibaca. Coba gambar lain (JPG atau PNG).');}).then(function(){
+        pickBtn.disabled=false; pickBtn.lastChild.textContent='Pilih dari galeri'; pick.value='';
+      });
+    });
+    clrBtn.addEventListener('click',function(){dataUrl='';clrBtn.hidden=true;paint();});
+    img.addEventListener('input',function(){if(img.value.trim()){dataUrl='';clrBtn.hidden=true;}});
+    [img,href,code,h].forEach(function(i){i.addEventListener('input',paint);}); paint();
+    return {node:el('div',{class:'adbox'},el('h3',{text:title}),
+      el('div',null,el('label',{text:'Gambar banner dari galeri HP'}),el('div',{class:'actions'},pickBtn,clrBtn),pick),
+      el('div',null,el('label',{text:'Atau alamat gambar (https)'}),img),
+      el('div',null,el('label',{text:'Link tujuan saat diketuk (https)'}),href),
+      el('div',null,el('label',{text:'Atau kode iklan (menggantikan gambar jika diisi)'}),code),
+      el('div',null,el('label',{text:'Tinggi kotak kode iklan (px, 50–600)'}),h),
+      el('div',null,el('div',{class:'hint',text:'Pratinjau'}),prev)),
+      get:function(){return {img:img.value.trim(),data:dataUrl,href:href.value.trim(),code:code.value.trim(),h:Math.max(50,Math.min(600,Math.round(Number(h.value)||100)))};}};
+  }
+  var top=slotBox('top','Iklan atas (di bawah header)'), bot=slotBox('bottom','Iklan bawah (di atas footer)');
+  var err=el('div',{class:'err',role:'alert'}), save=el('button',{type:'button',class:'btn primary lg'},'Simpan');
+  save.addEventListener('click',function(){
+    err.textContent='';
+    var data={on:on,top:top.get(),bottom:bot.get(),updatedAt:Date.now()}, bad='';
+    [['top','atas'],['bottom','bawah']].forEach(function(p){var s=data[p[0]];
+      if(s.img&&!httpsOnly(s.img))bad='Alamat gambar iklan '+p[1]+' harus diawali https://';
+      if(s.href&&!httpsOnly(s.href))bad='Link tujuan iklan '+p[1]+' harus diawali https://';
+      if(s.code.length>6000)bad='Kode iklan '+p[1]+' terlalu panjang (maksimal 6000 karakter).';});
+    if(bad){err.textContent=bad;return;}
+    save.disabled=true;
+    S.db.collection('settings').doc('ads').set(data).then(function(){
+      save.disabled=false; S.ads=data; S.adKey='#'; renderAds(); toast('Iklan disimpan');
+    }).catch(function(e){
+      save.disabled=false; err.textContent=(e&&e.code==='permission-denied')?'Ditolak. Akunmu belum terdaftar sebagai admin atau aturan keamanan belum diperbarui.':'Gagal menyimpan. Coba lagi.';
+    });
+  });
+  $('#main').replaceChildren(el('section',{class:'card'},el('div',{class:'stack'},
+    el('div',null,el('h1',{text:'Panel Admin',style:'margin:0 0 6px'}),el('span',{class:'chip info'},icon('shield',13),'@'+S.acct)),
+    sw,top.node,bot.node,
+    el('div',{class:'notice',text:'Banner gambar dan link paling pasti jalan. Kode iklan dari jaringan iklan dijalankan di kotak terisolasi, jadi sebagian jaringan iklan mungkin tidak menampilkannya.'}),
+    err,el('div',{class:'actions'},save,el('button',{type:'button',class:'btn lg',onclick:function(){go('');}},'Lihat situs')))));
+}
+
+/* ---------- mulai ---------- */
+function initFirebase(){
+  var cfg=window.FIREBASE_CONFIG;
+  if(!window.firebase||!cfg||!cfg.apiKey||/^ISI/i.test(cfg.apiKey)){
+    S.noConfig=true; S.dbChecked=true; S.net='offline'; renderStatus(); navTo(S.slug,true); return;
+  }
+  try{firebase.initializeApp(cfg);}catch(e){}
+  S.auth=firebase.auth(); S.db=firebase.firestore();
+  S.auth.onAuthStateChanged(function(u){
+    if(!u){S.auth.signInAnonymously().catch(function(){S.dbChecked=true;S.net='error';renderStatus();navTo(S.slug,true);});return;}
+    applyUser(u);
+  });
+}
+function boot(){
+  try{var t=localStorage.getItem('pl-theme'); if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}
+  renderHeader(); renderFooter();
+  window.addEventListener('hashchange',function(){navTo(readSlug());});
+  navTo(readSlug(),true);
+  initFirebase();
+}
+boot();
+})();
+</script>
+</body>
+</html>
