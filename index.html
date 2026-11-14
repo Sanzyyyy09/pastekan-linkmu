@@ -188,6 +188,7 @@ textarea.inp{font-family:var(--f-mono);font-size:13.5px;line-height:1.6;min-heig
 .check{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:500;margin:0;cursor:pointer}
 .check input{width:18px;height:18px;accent-color:var(--accent);margin:0}
 .seg{display:inline-flex;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:4px;gap:2px}
+.seg[hidden]{display:none}
 .seg button{border:0;background:transparent;padding:8px 16px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer}
 .seg button:hover{color:var(--ink)}
 .seg button[aria-checked="true"],.seg button[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:0 8px 16px -8px #6366F1}
@@ -229,6 +230,33 @@ textarea.inp{font-family:var(--f-mono);font-size:13.5px;line-height:1.6;min-heig
 .dash{display:flex;flex-direction:column;gap:18px}
 .hello{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .avatar{width:52px;height:52px;border-radius:16px;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;flex:none}
+.avatar{overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.lg{width:96px;height:96px;border-radius:26px;font-size:30px}
+.chipbtn{border:0;cursor:pointer;font:inherit}
+.chipbtn:hover{filter:brightness(1.06)}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.chead h2{margin:0}
+.cdesc{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+.cnote{margin:12px 0 0;color:var(--muted);font-size:12.5px}
+.mini3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.mini3>div{background:var(--field);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-width:0}
+.mini3 span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.mini3 b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px}
+.mini3 em{font-style:normal;font-size:11.5px;color:var(--muted)}
+.pfrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.pfbtn{flex:1;min-width:200px}
+.pfbtn .hint{min-height:0;margin:8px 0 0}
+textarea.inp.bio{font-family:var(--f-body);font-size:15px;line-height:1.5;min-height:110px}
+.lrow2{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.lrow2 label{margin-bottom:7px}
+.cnt{font-size:12px;color:var(--muted)}
+label.chk{display:flex;align-items:center;gap:8px;font-weight:500;margin:0;cursor:pointer}
+label.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.dz{border-color:color-mix(in srgb,var(--bad) 35%,var(--line))}
+.dz .hbadge{background:var(--bad-soft);color:var(--bad)}
+.dzbody{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.dzwarn{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:600}
 .hello .tx{flex:1;min-width:180px}
 .hello h2{margin:0 0 2px;font-size:19px}
 .hello p{margin:0;font-size:13px;color:var(--muted)}
@@ -515,9 +543,9 @@ function linkify(parent,text){
 }
 
 /* ---------- rute & alamat ---------- */
-var PAGES={masuk:1,dashboard:1,kelola:1,ketentuan:1,privasi:1,tentang:1,admin:1};
+var PAGES={masuk:1,dashboard:1,kelola:1,profil:1,ketentuan:1,privasi:1,tentang:1,admin:1};
 var SCROLLS={buat:'composer',fitur:'fitur',faq:'faq'};
-var RESERVED={settings:1,sidebar:1,customize:1,upgrade:1,downloads:1,baru:1,home:1,masuk:1,dashboard:1,kelola:1,ketentuan:1,privasi:1,tentang:1,buat:1,fitur:1,faq:1,admin:1};
+var RESERVED={settings:1,sidebar:1,customize:1,upgrade:1,downloads:1,baru:1,home:1,masuk:1,dashboard:1,kelola:1,profil:1,ketentuan:1,privasi:1,tentang:1,buat:1,fitur:1,faq:1,admin:1};
 function validSlug(s){return /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(s)&&!RESERVED[s]&&s.indexOf('comment-')!==0;}
 function genSlug(){
   var ch='abcdefghjkmnpqrstuvwxyz23456789', a=new Uint8Array(6), s='';
@@ -553,7 +581,7 @@ var ACCT_DOMAIN='@akun.pastekan.app';
 var S={db:null,auth:null,ready:false,noConfig:false,dbChecked:false,uid:null,acct:'',canWrite:true,admin:false,net:'connecting',
   pub:[],mine:[],metas:new Map(),listReady:false,agg:{},hits:new Map(),statsAt:0,tab:'recent',q:'',shown:30,
   slug:'',rendered:false,cur:null,editing:false,pwds:new Map(),viewed:{},flash:'',flashSlug:'',raw:false,
-  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adKey:'',isAdmin:null,next:''};
+  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adKey:'',isAdmin:null,next:'',dr:'d',dn:30,prof:null,profFor:'',statsFrom:null,statsBusy:false,profDirty:false};
 
 function isMine(m){return !!(m&&m.ownerId&&S.uid&&m.ownerId===S.uid);}
 function canManage(m){return isMine(m)&&!!S.acct;}
@@ -588,17 +616,17 @@ function navLink(r,label,ic){
 }
 function renderHeader(){
   var h=$('#hdr');
-  var items=[['','Beranda','home'],['buat','Buat Paste','plus']].concat(S.acct?[['dashboard','Dashboard','chart']]:[],[['fitur','Fitur Unggulan','star'],['faq','FAQ','help']]);
+  var items=[['','Beranda','home'],['buat','Buat Paste','plus']].concat(S.acct?[['dashboard','Dashboard','chart'],['profil','Profil Saya','user']]:[],[['fitur','Fitur Unggulan','star'],['faq','FAQ','help']]);
   var nav=el('nav',{class:'nav','aria-label':'Menu utama'},items.map(function(i){return navLink(i[0],i[1]);}));
   var acct=S.acct
-    ?[el('span',{class:'chip info dsk'},icon('user',13),'@'+S.acct),el('button',{type:'button',class:'btn sm dsk',onclick:function(){setAcct('');toast('Sudah keluar');}},'Keluar')]
+    ?[el('button',{type:'button',class:'chip info dsk chipbtn','aria-label':'Buka profil saya',onclick:function(){go('profil');}},icon('user',13),'@'+S.acct),el('button',{type:'button',class:'btn sm dsk',onclick:function(){setAcct('');toast('Sudah keluar');}},'Keluar')]
     :[el('button',{type:'button',class:'btn sm dsk',onclick:function(){S.authMode='login';go('masuk');}},'Masuk'),el('button',{type:'button',class:'btn sm light dsk',onclick:function(){S.authMode='register';go('masuk');}},'Daftar')];
   var theme=el('button',{type:'button',class:'icon-btn',onclick:toggleTheme,'aria-label':'Ganti tema terang atau gelap'},icon(isDark()?'sun':'moon',18));
   var burger=el('button',{type:'button',class:'icon-btn only-m','aria-label':S.menu?'Tutup menu':'Buka menu','aria-expanded':String(S.menu),onclick:function(){S.menu=!S.menu;renderHeader();}},icon(S.menu?'x':'menu',20));
   var panel=el('div',{class:'mpanel'+(S.menu?' on':''),id:'mpanel'},
     items.map(function(i){return navLink(i[0],i[1],i[2]);}),
     S.acct
-      ?el('div',{class:'mb'},el('span',{class:'chip info',style:'justify-content:center;padding:12px'},'@'+S.acct),el('button',{type:'button',class:'btn',onclick:function(){S.menu=false;setAcct('');toast('Sudah keluar');}},'Keluar'))
+      ?el('div',{class:'mb'},el('span',{class:'chip info',style:'justify-content:center;padding:12px'},(S.prof&&S.prof.name?S.prof.name+' · ':'')+'@'+S.acct),el('button',{type:'button',class:'btn',onclick:function(){S.menu=false;setAcct('');toast('Sudah keluar');}},'Keluar'))
       :el('div',{class:'mb'},el('button',{type:'button',class:'btn',onclick:function(){S.menu=false;S.authMode='login';go('masuk');}},'Masuk'),el('button',{type:'button',class:'btn light',onclick:function(){S.menu=false;S.authMode='register';go('masuk');}},'Daftar')));
   var brand=el('button',{type:'button',class:'brand','aria-label':'Pastekan Linkmu, ke beranda',onclick:function(){S.menu=false;go('');}},
     el('span',{class:'mark'},icon('clip',22)),
@@ -613,7 +641,7 @@ function renderFooter(){
         el('div',{class:'brand',style:'cursor:default'},el('span',{class:'mark'},icon('clip',22)),el('span',{class:'wm'},'Pastekan ',el('b',null,'Linkmu'))),
         el('p',null,'Simpan teks atau daftar link, lalu bagikan lewat satu alamat pendek. Bisa dikunci sandi dan diberi masa berlaku.'),
         el('span',{class:'chip',id:'status'},el('i'),el('span',{text:'Menghubungkan…'}))),
-      el('div',null,el('h4',{text:'Platform & Fitur'}),el('ul',null,fl('buat','Buat Paste'),S.acct?fl('kelola','Kelola Tautan Saya'):null,S.acct?fl('dashboard','Dashboard'):null,fl('fitur','Fitur Unggulan'),fl('faq','Tanya Jawab (FAQ)'))),
+      el('div',null,el('h4',{text:'Platform & Fitur'}),el('ul',null,fl('buat','Buat Paste'),S.acct?fl('kelola','Kelola Tautan Saya'):null,S.acct?fl('dashboard','Dashboard'):null,S.acct?fl('profil','Profil Saya'):null,fl('fitur','Fitur Unggulan'),fl('faq','Tanya Jawab (FAQ)'))),
       el('div',null,el('h4',{text:'Informasi & Legal'}),el('ul',null,fl('ketentuan','Ketentuan Layanan'),fl('privasi','Kebijakan Privasi'),fl('tentang','Tentang Kami'),fl('admin','Admin')))),
     el('div',{class:'copy'},el('span',{text:'© 2026 Pastekan Linkmu. Semua hak dilindungi.'}),el('span',{text:'Dibuat di Indonesia'})))));
   renderStatus();
@@ -638,6 +666,7 @@ function navTo(r,force){
   else if(k==='admin')renderAdmin();
   else if(k==='dashboard')renderDash();
   else if(k==='kelola')renderManage();
+  else if(k==='profil')renderProfile();
   else renderInfo(k);
   if(SCROLLS[r]){setTimeout(function(){var t=document.getElementById(SCROLLS[r]);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},40);}
   else{try{window.scrollTo(0,0);}catch(e){}}
@@ -745,7 +774,7 @@ var unsubs=[];
 /* Daftar paste hanya dimuat untuk pengguna yang sudah punya akun, dan hanya milik akun itu. Tamu hanya bisa membuat link. */
 function startData(){
   unsubs.forEach(function(u){try{u();}catch(e){}}); unsubs=[];
-  S.pub=[]; S.mine=[]; S.agg={}; S.hits=new Map(); S.statsAt=0; S.dataAcct=!!S.acct; rebuildMetas();
+  S.pub=[]; S.mine=[]; S.agg={}; S.hits=new Map(); S.statsAt=0; S.statsFrom=null; S.dataAcct=!!S.acct; rebuildMetas();
   if(!S.acct){S.listReady=true; S.net='ok'; renderStatus(); return;}
   S.listReady=false;
   var loadTimer=setTimeout(function(){if(!S.listReady){S.net='slow';renderStatus();}},10000);
@@ -753,20 +782,22 @@ function startData(){
     clearTimeout(loadTimer); S.mine=snap.docs.map(metaFrom); S.listReady=true; S.net='ok'; renderStatus(); rebuildMetas(); refreshLive();
   },function(){clearTimeout(loadTimer);S.net='error';renderStatus();}));
 }
-/* Statistik dibaca sekali saat Dashboard atau Kelola dibuka (hemat kuota baca harian). */
-function loadStats(force){
+/* Statistik dibaca sekali saat Dashboard atau Kelola dibuka (hemat kuota baca harian).
+   Kueri hits hanya memakai satu syarat (owner) supaya tidak butuh indeks gabungan; rentang tanggal disaring di browser. */
+function statsFromKey(r){return r==='y'?20000101:dayKey(Date.now()-(r==='m'?364:Math.max(S.dn||30,30)-1)*86400000);}
+function loadStats(force,range){
   if(!S.db||!S.uid)return Promise.resolve();
-  if(!force&&Date.now()-S.statsAt<15000)return Promise.resolve();
-  S.statsAt=Date.now();
-  var from=dayKey(Date.now()-6*86400000), db=S.db;
+  var from=statsFromKey(range||S.dr||'d');
+  if(!force&&S.statsFrom!=null&&S.statsFrom<=from&&Date.now()-S.statsAt<30000)return Promise.resolve();
+  S.statsAt=Date.now(); S.statsFrom=from; S.statsBusy=true; var db=S.db;
   return Promise.all([
     db.collection('counts').where('owner','==',S.uid).get(),
-    db.collection('hits').where('owner','==',S.uid).where('day','>=',from).get()
+    db.collection('hits').where('owner','==',S.uid).get()
   ]).then(function(r){
     var agg={}; r[0].docs.forEach(function(d){agg[d.id]={total:Number(d.data().n)||0};});
-    var hm=new Map(); r[1].docs.forEach(function(d){var v=d.data(); if(v&&v.slug)hm.set(d.id,v);});
-    S.agg=agg; S.hits=hm; refreshLive();
-  }).catch(function(){});
+    var hm=new Map(); r[1].docs.forEach(function(d){var v=d.data(); if(v&&v.slug&&Number(v.day)>=from)hm.set(d.id,v);});
+    S.agg=agg; S.hits=hm; S.statsBusy=false; refreshLive();
+  }).catch(function(){S.statsBusy=false;S.statsFrom=null;});
 }
 function applyUser(u){
   var changed=S.uid!==u.uid;
@@ -775,8 +806,9 @@ function applyUser(u){
   if(u.email&&u.email.slice(-ACCT_DOMAIN.length)===ACCT_DOMAIN)S.acct=u.email.slice(0,-ACCT_DOMAIN.length);
   else if(!u.isAnonymous&&u.email)S.acct=String(u.displayName||u.email.split('@')[0]).trim().split(/\s+/)[0].slice(0,20)||'akun';
   else S.acct='';
+  if(changed||!S.acct){S.prof=null;S.profFor='';}
   var acctChanged=(!!S.acct)!==S.dataAcct;
-  S.dbChecked=true; renderHeader(); renderFooter();
+  S.dbChecked=true; renderHeader(); renderFooter(); loadProfile();
   if(changed||acctChanged)startData();
   if(!S.ready){S.ready=true;navTo(S.slug,true);}
   else if(changed||acctChanged)navTo(S.slug,true);
@@ -1028,22 +1060,43 @@ function pageHead(crumb,title,desc,actions){
   return el('div',{class:'phead'},el('div',{class:'crumb',text:'Pastekan Linkmu / Panel / '+crumb}),el('h1',{text:title}),desc?el('p',{text:desc}):null,actions?el('div',{class:'actions'},actions):null);
 }
 function svgEl(tag,attrs){var n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in attrs)n.setAttribute(k,String(attrs[k]));return n;}
-function barChart(vals,labels){
-  var W=560,H=230,L=34,B=30,T=24,R=8, max=Math.max.apply(null,vals), ymax=max<4?4:Math.ceil(max/4)*4;
-  var svg=svgEl('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Grafik kunjungan 7 hari terakhir',class:'chart'});
+function barChart(vals,labels,aria){
+  var W=560,H=230,L=34,B=30,T=24,R=8, max=Math.max.apply(null,vals.concat([0])), ymax=max<4?4:Math.ceil(max/4)*4;
+  var svg=svgEl('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':aria||'Grafik kunjungan',class:'chart'});
   [0,ymax/2,ymax].forEach(function(t){
     var y=T+(H-T-B)*(1-t/ymax);
     svg.append(svgEl('line',{x1:L,x2:W-R,y1:y,y2:y,class:'gl'}));
     var tx=svgEl('text',{x:L-8,y:y+4,'text-anchor':'end',class:'ax'}); tx.textContent=String(t); svg.append(tx);
   });
-  var n=vals.length, slot=(W-L-R)/n, bw=Math.min(38,slot*.56);
+  var n=vals.length, slot=(W-L-R)/n, bw=Math.min(38,slot*.62), step=n>14?Math.ceil(n/7):1;
   vals.forEach(function(v,i){
     var h=(H-T-B)*v/ymax, x=L+slot*i+(slot-bw)/2, y=H-B-h;
-    if(v)svg.append(svgEl('rect',{x:x,y:y,width:bw,height:Math.max(h,3),rx:6,class:i===n-1?'bar today':'bar'}));
-    if(v){var vt=svgEl('text',{x:x+bw/2,y:y-7,'text-anchor':'middle',class:'bv'});vt.textContent=String(v);svg.append(vt);}
-    var lt=svgEl('text',{x:x+bw/2,y:H-10,'text-anchor':'middle',class:'ax'});lt.textContent=labels[i];svg.append(lt);
+    if(v)svg.append(svgEl('rect',{x:x,y:y,width:bw,height:Math.max(h,3),rx:Math.min(6,bw/2),class:i===n-1?'bar today':'bar'}));
+    if(v&&n<=14){var vt=svgEl('text',{x:x+bw/2,y:y-7,'text-anchor':'middle',class:'bv'});vt.textContent=String(v);svg.append(vt);}
+    if((n-1-i)%step===0){var lt=svgEl('text',{x:x+bw/2,y:H-10,'text-anchor':'middle',class:'ax'});lt.textContent=labels[i];svg.append(lt);}
   });
   return svg;
+}
+/* Kumpulan data grafik per rentang: harian (30 hari), bulanan (12 bulan), tahunan (semua tahun yang ada data, minimal 2). */
+var BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function chartSeries(range,perDay){
+  var vals=[],labels=[],now=new Date(),i,k;
+  if(range==='d'){
+    var t=new Date();t.setHours(12,0,0,0);
+    var dn=S.dn||30;
+    for(i=dn-1;i>=0;i--){var d=new Date(t.getTime()-i*86400000);vals.push(perDay[dayKey(d.getTime())]||0);labels.push(String(d.getDate()));}
+    return {vals:vals,labels:labels,unit:'hari',aria:'Grafik kunjungan '+dn+' hari terakhir',span:dn+' hari terakhir'};
+  }
+  if(range==='m'){
+    var y=now.getFullYear(),m=now.getMonth(),mm={};
+    for(k in perDay){var kk=Number(k),ym=Math.floor(kk/100);mm[ym]=(mm[ym]||0)+perDay[k];}
+    for(i=11;i>=0;i--){var yy=y,mo=m-i;while(mo<0){mo+=12;yy--;}vals.push(mm[yy*100+mo+1]||0);labels.push(BLN[mo]);}
+    return {vals:vals,labels:labels,unit:'bulan',aria:'Grafik kunjungan 12 bulan terakhir',span:'12 bulan terakhir'};
+  }
+  var yr={},first=now.getFullYear()-1;
+  for(k in perDay){var yv=Math.floor(Number(k)/10000);yr[yv]=(yr[yv]||0)+perDay[k];if(yv<first)first=yv;}
+  for(i=first;i<=now.getFullYear();i++){vals.push(yr[i]||0);labels.push(String(i));}
+  return {vals:vals,labels:labels,unit:'tahun',aria:'Grafik kunjungan per tahun',span:'semua tahun'};
 }
 function kpi(c,label,value,badge,sub,ic){
   var k=el('div',{class:'card kpi'},el('span',{class:'kic'},icon(ic,34)),el('div',{class:'kl',text:label}),
@@ -1060,33 +1113,52 @@ function needLogin(what,slug){
       el('button',{type:'button',class:'btn primary lg',onclick:function(){S.next=slug;S.authMode='login';go('masuk');}},'Masuk'),
       el('button',{type:'button',class:'btn lg',onclick:function(){S.next=slug;S.authMode='register';go('masuk');}},'Daftar'))));
 }
+/* Ekspor CSV: satu baris per paste per hari. Teks yang diawali = + - @ diberi tanda kutip supaya tidak dibaca sebagai rumus oleh Excel. */
+function csvCell(v){var s=String(v==null?'':v); if(/^[=+\-@\t\r]/.test(s))s="'"+s; return '"'+s.replace(/"/g,'""')+'"';}
+function exportCsv(btn){
+  if(btn)btn.disabled=true;
+  loadStats(true,'y').then(function(){
+    var slugs={}; Array.from(S.metas.values()).filter(isMine).forEach(function(m){slugs[m.slug]=m;});
+    var rows=[['tanggal','alamat','judul','dibuka']], list=[];
+    S.hits.forEach(function(h){if(slugs[h.slug])list.push(h);});
+    list.sort(function(a,b){return Number(b.day)-Number(a.day);});
+    list.forEach(function(h){var d=String(h.day); rows.push([d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8),shortLink(h.slug),slugs[h.slug].title||'',Number(h.n)||0]);});
+    var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(',');}).join('\r\n');
+    var url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})), a=document.createElement('a');
+    a.href=url; a.download='statistik-pastekan-'+dayKey(Date.now())+'.csv'; document.body.append(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},4000);
+    toast(list.length?'CSV diunduh ('+nf(list.length)+' baris)':'CSV diunduh, belum ada data kunjungan');
+  }).catch(function(){toast('Gagal membuat CSV. Coba lagi.');}).then(function(){if(btn)btn.disabled=false;});
+}
 function renderDash(){
   if(!S.acct)return needLogin('Dashboard','dashboard');
   S.cur=null; loadStats();
   var main=$('#main'), nodes=[];
-  var actions=[el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('list',16),'Kelola Tautan'),el('button',{type:'button',class:'btn light',onclick:function(){go('buat');}},icon('plus',16),'Buat Paste Baru')];
-  nodes.push(pageHead('Dashboard','Dashboard','Ringkasan kunjungan harian, tren 7 hari, dan tautan terpopuler milikmu.',actions));
+  var csvBtn=el('button',{type:'button',class:'btn',onclick:function(){exportCsv(csvBtn);}},icon('file',16),'Ekspor CSV');
+  var actions=[el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('list',16),'Kelola Tautan'),csvBtn,el('button',{type:'button',class:'btn light',onclick:function(){go('buat');}},icon('plus',16),'Buat Paste Baru')];
+  nodes.push(pageHead('Dashboard','Dashboard','Ringkasan kunjungan, grafik harian, bulanan, dan tahunan, serta tautan terpopuler milikmu.',actions));
   if(S.dbChecked&&!S.db){
     nodes.push(el('div',{class:'notice warn'},'Penyimpanan belum tersambung. Periksa koneksi internet dan pengaturan Firebase, lalu muat ulang halaman ini untuk melihat dashboard.'));
     main.replaceChildren.apply(main,nodes); return;
   }
   var mine=Array.from(S.metas.values()).filter(isMine), slugs={}; mine.forEach(function(m){slugs[m.slug]=m;});
   var days=lastDays(7), per={}; days.forEach(function(d){per[d.key]=0;});
-  var week={}, feed=[];
+  var week={}, feed=[], perDay={};
   S.hits.forEach(function(h){
     if(!slugs[h.slug])return;
-    if(per[h.day]!=null){per[h.day]+=Number(h.n)||0; week[h.slug]=(week[h.slug]||0)+(Number(h.n)||0);}
+    var hn=Number(h.n)||0; perDay[h.day]=(perDay[h.day]||0)+hn;
+    if(per[h.day]!=null){per[h.day]+=hn; week[h.slug]=(week[h.slug]||0)+hn;}
     feed.push(h);
   });
   var vals=days.map(function(d){return per[d.key];}), today=vals[6], yest=vals[5], sum=vals.reduce(function(a,b){return a+b;},0);
   var now=Date.now(), active=mine.filter(function(m){return !expiryOf(m)||expiryOf(m)>now;}).length;
   var total=0; mine.forEach(function(m){total+=(S.agg[m.slug]?S.agg[m.slug].total:0);});
-  var name=S.acct||'Tamu';
+  var name=dispName();
   nodes.push(el('section',{class:'card'},el('div',{class:'hello'},
-    el('div',{class:'avatar',text:name.slice(0,2).toUpperCase()}),
-    el('div',{class:'tx'},el('h2',null,'Halo, '+name+'! ',el('span',{class:'chip info',text:S.acct?'Pengguna':'Tanpa akun'})),
+    avatarNode(),
+    el('div',{class:'tx'},el('h2',null,'Halo, '+name+'! ',el('span',{class:'chip info',text:S.acct?'@'+S.acct:'Tanpa akun'})),
       el('p',{text:new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · pantau paste aktifmu'})),
-    el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('grid',16),'Semua Tautan'))));
+    el('div',{class:'actions'},el('button',{type:'button',class:'btn',onclick:function(){go('profil');}},icon('user',16),'Profil'),el('button',{type:'button',class:'btn',onclick:function(){go('kelola');}},icon('grid',16),'Semua Tautan')))));
   if(!S.acct)nodes.push(el('div',{class:'notice'},'Kamu belum masuk, jadi dashboard hanya menampilkan paste yang dibuat dari perangkat ini. ',el('a',{href:'#masuk',style:'font-weight:700;text-decoration:underline',onclick:function(e){e.preventDefault();S.authMode='register';go('masuk');}},'Daftar atau masuk'),' supaya paste terhubung ke akunmu.'));
   var delta=null;
   if(yest>0){var pc=Math.round((today-yest)/yest*100); delta=el('span',{class:'chip '+(pc>=0?'ok':'bad')},icon(pc>=0?'up':'down',13),(pc>0?'+':'')+pc+'%');}
@@ -1094,9 +1166,39 @@ function renderDash(){
     kpi('ci4','Trafik hari ini',nf(today),delta||el('span',{class:'chip',text:'dibuka'}),yest>0?'dibanding kemarin ('+nf(yest)+')':'belum ada data kemarin','up'),
     kpi('ci1','Trafik 7 hari',nf(sum),el('span',{class:'chip info',text:'7 hari'}),'Rata-rata ≈ '+nf(Math.round(sum/7))+' kunjungan per hari','clock'),
     kpi('ci2','Total tautan',nf(mine.length),el('span',{class:'chip ok'},el('i'),nf(active)+' aktif'),'Total dibuka: '+nf(total)+' kali','file')));
-  nodes.push(el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('chart',17)),'Tren trafik 7 hari terakhir'),
-    el('p',{class:'ks',style:'margin:-6px 0 12px;color:var(--muted);font-size:13px',text:'Jumlah pembukaan paste milikmu per hari. Satu orang yang membuka lagi di hari yang sama ikut dihitung.'}),
-    sum?barChart(vals,days.map(function(d){return d.label;})):el('div',{class:'empty',text:'Belum ada kunjungan dalam 7 hari terakhir. Bagikan alamat pastemu untuk mulai melihat grafik.'})));
+  var rng=[['d','Harian'],['m','Bulanan'],['y','Tahunan']];
+  var chartBox=el('div',{id:'dchart'});
+  function drawChart(){
+    var cs=chartSeries(S.dr,perDay), tot=cs.vals.reduce(function(a,b){return a+b;},0), pk=0, pi=-1;
+    cs.vals.forEach(function(v,i){if(v>pk){pk=v;pi=i;}});
+    chartBox.replaceChildren(
+      tot?barChart(cs.vals,cs.labels,cs.aria):el('div',{class:'empty',text:S.statsBusy?'Memuat data…':'Belum ada kunjungan pada rentang ini. Bagikan alamat pastemu untuk mulai melihat grafik.'}),
+      el('div',{class:'mini3'},
+        el('div',null,el('span',{text:'Total'}),el('b',{text:nf(tot)})),
+        el('div',null,el('span',{text:'Rata-rata per '+cs.unit}),el('b',{text:nf(Math.round(tot/cs.vals.length))})),
+        el('div',null,el('span',{text:'Puncak'}),el('b',{text:pk?nf(pk):'-'}),pk?el('em',{text:cs.labels[pi]}):null)));
+  }
+  var seg=el('div',{class:'seg',role:'tablist','aria-label':'Rentang grafik'},rng.map(function(r){
+    var b=el('button',{type:'button',role:'tab','aria-selected':String(S.dr===r[0]),text:r[1]});
+    b.addEventListener('click',function(){
+      S.dr=r[0]; Array.from(seg.children).forEach(function(c,i){c.setAttribute('aria-selected',String(rng[i][0]===S.dr));});
+      desc.textContent=descOf(); dsel.hidden=S.dr!=='d'; drawChart();
+      loadStats(false,S.dr);
+    });
+    return b;}));
+  var dsel=el('div',{class:'seg',role:'tablist','aria-label':'Jumlah hari','data-k':'dn',style:'margin-bottom:12px'},[7,14,30,60,90].map(function(n){
+    var b=el('button',{type:'button',role:'tab','aria-selected':String((S.dn||30)===n),text:n+'H','aria-label':n+' hari'});
+    b.addEventListener('click',function(){
+      S.dn=n; Array.from(dsel.children).forEach(function(c,i){c.setAttribute('aria-selected',String([7,14,30,60,90][i]===n));});
+      desc.textContent=descOf(); drawChart(); loadStats(false,'d');
+    });
+    return b;}));
+  dsel.hidden=S.dr!=='d';
+  function descOf(){return S.dr==='d'?'Pembukaan paste milikmu per hari selama '+(S.dn||30)+' hari terakhir.':S.dr==='m'?'Total pembukaan paste milikmu per bulan selama 12 bulan terakhir.':'Total pembukaan paste milikmu per tahun.';}
+  var desc=el('p',{class:'cdesc',text:descOf()});
+  drawChart();
+  nodes.push(el('section',{class:'card'},el('div',{class:'chead'},el('h2',null,el('span',{class:'hbadge'},icon('chart',17)),'Grafik kunjungan'),seg),desc,dsel,chartBox,
+    el('p',{class:'cnote',text:'Satu pengunjung dihitung sekali per paste per hari. Kunjunganmu sendiri tidak dihitung.'})));
   var top=mine.slice().sort(function(a,b){return ((S.agg[b.slug]?S.agg[b.slug].total:0)-(S.agg[a.slug]?S.agg[a.slug].total:0))||b.createdAt-a.createdAt;}).slice(0,6);
   var rank=el('div',{class:'rank'});
   if(!top.length)rank.append(el('div',{class:'empty',text:'Belum ada paste. Buat paste pertamamu untuk mengisi daftar ini.'}));
@@ -1122,9 +1224,185 @@ function renderDash(){
   var wrap=el('div',{class:'dash'},nodes.slice(1));
   main.replaceChildren(nodes[0],wrap);
 }
+/* ---------- profil ---------- */
+function dispName(){return (S.prof&&S.prof.name)||S.acct||'Tamu';}
+function avatarNode(big){
+  var n=dispName(), a=el('div',{class:'avatar'+(big?' lg':'')}), ph=S.prof&&S.prof.photo;
+  if(ph&&/^data:image\/(jpeg|png|webp);base64,/.test(ph))a.append(el('img',{src:ph,alt:'Foto profil '+n}));
+  else a.textContent=n.slice(0,2).toUpperCase();
+  return a;
+}
+function isSynthetic(u){return !!(u&&u.email&&String(u.email).slice(-ACCT_DOMAIN.length)===ACCT_DOMAIN);}
+function afterProfile(){
+  renderHeader(); var k=kindOf(S.slug);
+  if(k==='profil'&&!S.profDirty)renderProfile(); else if(k==='dashboard')renderDash();
+}
+function loadProfile(){
+  if(!S.db||!S.uid||!S.acct){S.prof=null;S.profFor='';return Promise.resolve();}
+  if(S.profFor===S.uid)return Promise.resolve();
+  var uid=S.uid; S.profFor=uid;
+  return S.db.collection('profiles').doc(uid).get().then(function(sn){
+    if(S.uid!==uid)return;
+    S.prof=sn.exists?sn.data():null; afterProfile();
+  }).catch(function(){if(S.profFor===uid)S.profFor='';});
+}
+/* Foto profil: dipotong persegi, diperkecil jadi JPEG kecil (maks. ±30 KB) supaya muat di Firestore tanpa biaya. */
+function shrinkAvatar(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      URL.revokeObjectURL(url);
+      var w0=im.naturalWidth,h0=im.naturalHeight; if(!w0||!h0)return rej(new Error('kosong'));
+      var side=Math.min(w0,h0), sx=(w0-side)/2, sy=(h0-side)/2, size=256, q=0.85;
+      for(var i=0;i<10;i++){
+        var c=document.createElement('canvas'); c.width=size; c.height=size;
+        var g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,size,size); g.drawImage(im,sx,sy,side,side,0,0,size,size);
+        var out=c.toDataURL('image/jpeg',q);
+        if(out.length<=30000)return res(out);
+        if(q>0.5)q-=0.1; else size=Math.round(size*0.8);
+      }
+      rej(new Error('besar'));
+    };
+    im.onerror=function(){URL.revokeObjectURL(url);rej(new Error('rusak'));};
+    im.src=url;
+  });
+}
+function pwErr(e){
+  var c=e&&e.code;
+  if(c==='auth/wrong-password'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials')return 'Kata sandi saat ini salah.';
+  if(c==='auth/weak-password')return 'Kata sandi baru terlalu lemah. Pakai minimal 6 karakter.';
+  if(c==='auth/too-many-requests')return 'Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi.';
+  if(c==='auth/network-request-failed')return 'Koneksi bermasalah. Coba lagi.';
+  if(c==='auth/requires-recent-login')return 'Demi keamanan, keluar lalu masuk lagi, kemudian ulangi.';
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return 'Verifikasi Google dibatalkan.';
+  if(c==='auth/popup-blocked')return 'Jendela verifikasi diblokir browser. Izinkan popup lalu coba lagi.';
+  return 'Gagal memproses. Coba lagi sebentar lagi.';
+}
+/* Hapus akun: hapus semua paste (isi, hitungan, kunjungan), profil, lalu akun login. */
+function deleteAccount(pwd){
+  var u=S.auth.currentUser, db=S.db, uid=S.uid, reauth;
+  if(isSynthetic(u))reauth=u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pwd));
+  else reauth=u.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+  return reauth.then(function(){
+    return Promise.all([db.collection('pastes').where('ownerId','==',uid).get(),db.collection('counts').where('owner','==',uid).get(),db.collection('hits').where('owner','==',uid).get()]);
+  }).then(function(r){
+    var pastes=r[0].docs;
+    return Promise.all(pastes.map(function(d){return db.collection('contents').doc(d.id).delete();}))
+      .then(function(){return Promise.all(r[1].docs.concat(r[2].docs).map(function(d){return d.ref.delete();}));})
+      .then(function(){return Promise.all(pastes.map(function(d){return d.ref.delete();}));})
+      .then(function(){return db.collection('profiles').doc(uid).delete().catch(function(){});});
+  }).then(function(){return u.delete();});
+}
+function renderProfile(){
+  if(!S.acct)return needLogin('Profil','profil');
+  S.cur=null; S.profDirty=false; loadProfile();
+  var u=S.auth&&S.auth.currentUser, syn=isSynthetic(u), P=S.prof||{};
+  var photo=P.photo||'', main=$('#main');
+  function dirty(){S.profDirty=true;}
+  var head=pageHead('Profil','Profil Saya','Atur nama tampilan, foto, dan keamanan akunmu.',[el('button',{type:'button',class:'btn',onclick:function(){go('dashboard');}},icon('chart',16),'Dashboard')]);
+
+  /* identitas */
+  var avBox=el('div',{class:'pfav'});
+  function drawAv(){var keep=S.prof; S.prof=Object.assign({},keep||{},{photo:photo,name:nameI.value.trim()||(keep&&keep.name)||''}); avBox.replaceChildren(avatarNode(true)); S.prof=keep;}
+  var nameI=el('input',{id:'p-name',class:'inp',type:'text',maxlength:'40',autocomplete:'name',value:P.name||S.acct,placeholder:'Nama yang tampil di dashboard'});
+  var acctI=el('input',{id:'p-acct',class:'inp mono',type:'text',readonly:true,value:syn?'@'+S.acct:String(u&&u.email||'')});
+  var bio=el('textarea',{id:'p-bio',class:'inp bio',maxlength:'500',placeholder:'Tulis bio singkat tentang dirimu (opsional)'}); bio.value=P.bio||'';
+  var cnt=el('span',{class:'cnt',text:bio.value.length+'/500'});
+  var file=el('input',{type:'file',accept:'image/*',hidden:true,id:'p-file'});
+  var fErr=el('div',{class:'err',role:'alert'}), sErr=el('div',{class:'err',role:'alert'});
+  var pickBtn=el('button',{type:'button',class:'btn sm'},icon('plus',14),'Pilih foto');
+  var delBtn=el('button',{type:'button',class:'btn sm'},icon('trash',14),'Hapus foto');
+  delBtn.hidden=!photo;
+  pickBtn.addEventListener('click',function(){file.click();});
+  file.addEventListener('change',function(){
+    var f=file.files&&file.files[0]; file.value=''; fErr.textContent=''; if(!f)return;
+    if(!/^image\//.test(f.type))return void(fErr.textContent='Pilih berkas gambar (JPG, PNG, WEBP, atau GIF).');
+    if(f.size>5*1024*1024)return void(fErr.textContent='Gambar terlalu besar. Maksimal 5 MB.');
+    shrinkAvatar(f).then(function(d){photo=d;delBtn.hidden=false;dirty();drawAv();}).catch(function(){fErr.textContent='Gambar tidak bisa dibaca. Coba gambar lain.';});
+  });
+  delBtn.addEventListener('click',function(){photo='';delBtn.hidden=true;dirty();drawAv();});
+  nameI.addEventListener('input',function(){dirty();drawAv();});
+  bio.addEventListener('input',function(){dirty();cnt.textContent=bio.value.length+'/500';});
+  var saveBtn=el('button',{type:'button',class:'btn primary lg'},icon('shield',16),'Simpan perubahan');
+  saveBtn.addEventListener('click',function(){
+    sErr.textContent=''; var nm=nameI.value.trim().replace(/\s+/g,' ');
+    if(nm.length<2)return void(sErr.textContent='Nama minimal 2 karakter.');
+    if(!S.db)return void(sErr.textContent='Penyimpanan belum tersambung. Muat ulang halaman ini.');
+    var doc={name:nm.slice(0,40),bio:bio.value.trim().slice(0,500),photo:photo,updatedAt:Date.now()};
+    saveBtn.disabled=true;
+    S.db.collection('profiles').doc(S.uid).set(doc).then(function(){
+      saveBtn.disabled=false; S.prof=doc; S.profFor=S.uid; S.profDirty=false; renderHeader(); toast('Profil disimpan');
+    }).catch(function(e){
+      saveBtn.disabled=false;
+      sErr.textContent=e&&e.code==='permission-denied'?'Ditolak. Pastikan aturan Firestore terbaru (dengan bagian profiles) sudah dipasang.':'Gagal menyimpan. Coba lagi sebentar lagi.';
+    });
+  });
+  drawAv();
+  var cardId=el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('user',17)),'Informasi profil'),
+    el('div',{class:'pfrow'},avBox,el('div',{class:'pfbtn'},el('div',{class:'actions'},pickBtn,delBtn),el('div',{class:'hint',text:'Foto dipotong persegi dan dikecilkan otomatis. Format JPG, PNG, WEBP, atau GIF, maks. 5 MB.'}),fErr)),
+    el('div',{class:'stack',style:'margin-top:16px'},
+      el('div',null,el('label',{for:'p-name',text:'Nama tampilan'}),nameI),
+      el('div',null,el('label',{for:'p-acct',text:syn?'Nama pengguna':'Email Google'}),acctI,el('div',{class:'hint',text:syn?'Nama pengguna dipakai untuk masuk dan tidak bisa diganti.':'Akun ini masuk lewat Google.'})),
+      el('div',null,el('div',{class:'lrow2'},el('label',{for:'p-bio',text:'Bio'}),cnt),bio),
+      sErr,el('div',{class:'actions'},saveBtn)),file);
+
+  /* kata sandi */
+  var cardPw;
+  if(syn){
+    var p0=el('input',{id:'p-p0',class:'inp',type:'password',autocomplete:'current-password',placeholder:'Kata sandi saat ini'});
+    var p1=el('input',{id:'p-p1',class:'inp',type:'password',autocomplete:'new-password',placeholder:'Minimal 6 karakter'});
+    var p2=el('input',{id:'p-p2',class:'inp',type:'password',autocomplete:'new-password',placeholder:'Ulangi kata sandi baru'});
+    var show=el('input',{type:'checkbox',id:'p-show'});
+    show.addEventListener('change',function(){[p0,p1,p2].forEach(function(i){i.type=show.checked?'text':'password';});});
+    var pErr=el('div',{class:'err',role:'alert'}), pOk=el('div',{class:'hint ok',role:'status'});
+    var pBtn=el('button',{type:'button',class:'btn primary lg'},icon('lock',16),'Perbarui kata sandi');
+    pBtn.addEventListener('click',function(){
+      pErr.textContent=''; pOk.textContent='';
+      if(!p0.value)return void(pErr.textContent='Isi kata sandi saat ini.');
+      if(p1.value.length<6)return void(pErr.textContent='Kata sandi baru minimal 6 karakter.');
+      if(p1.value!==p2.value)return void(pErr.textContent='Kata sandi baru dan ulangannya tidak sama.');
+      if(p1.value===p0.value)return void(pErr.textContent='Kata sandi baru harus berbeda dari yang lama.');
+      var cu=S.auth.currentUser; pBtn.disabled=true;
+      cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email,p0.value)).then(function(){return cu.updatePassword(p1.value);}).then(function(){
+        pBtn.disabled=false; p0.value=p1.value=p2.value=''; pOk.textContent='Kata sandi berhasil diperbarui.'; toast('Kata sandi diperbarui');
+      }).catch(function(e){pBtn.disabled=false; pErr.textContent=pwErr(e);});
+    });
+    cardPw=el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('lock',17)),'Kata sandi'),
+      el('p',{class:'cdesc',text:'Pakai kata sandi yang sulit ditebak. Kata sandi yang lupa tidak bisa direset, jadi simpan baik-baik.'}),
+      el('div',{class:'stack'},el('div',null,el('label',{for:'p-p0',text:'Kata sandi saat ini'}),p0),el('div',null,el('label',{for:'p-p1',text:'Kata sandi baru'}),p1),el('div',null,el('label',{for:'p-p2',text:'Ulangi kata sandi baru'}),p2),
+        el('label',{class:'chk',for:'p-show'},show,'Tampilkan kata sandi'),pErr,pOk,el('div',{class:'actions'},pBtn)));
+  }else{
+    cardPw=el('section',{class:'card'},el('h2',null,el('span',{class:'hbadge'},icon('lock',17)),'Kata sandi'),el('p',{class:'cdesc',text:'Akunmu masuk lewat Google, jadi kata sandi diatur di akun Google-mu, bukan di sini.'}));
+  }
+
+  /* hapus akun */
+  var dzBody=el('div',{class:'dzbody',hidden:true}), dErr=el('div',{class:'err',role:'alert'});
+  var conf=el('input',{id:'p-conf',class:'inp mono',type:'text',autocomplete:'off',autocapitalize:'characters',spellcheck:'false',placeholder:'HAPUS'});
+  var dpw=syn?el('input',{id:'p-dpw',class:'inp',type:'password',autocomplete:'current-password',placeholder:'Kata sandi saat ini'}):null;
+  var dBtn=el('button',{type:'button',class:'btn danger lg'},icon('trash',16),'Hapus permanen'); dBtn.disabled=true;
+  conf.addEventListener('input',function(){dBtn.disabled=conf.value.trim()!=='HAPUS';});
+  dBtn.addEventListener('click',function(){
+    dErr.textContent='';
+    if(conf.value.trim()!=='HAPUS')return;
+    if(syn&&!dpw.value)return void(dErr.textContent='Isi kata sandi saat ini.');
+    dBtn.disabled=true;
+    deleteAccount(syn?dpw.value:'').then(function(){
+      S.prof=null; S.profFor=''; toast('Akun dan seluruh datanya sudah dihapus'); go('');
+    }).catch(function(e){dBtn.disabled=false; dErr.textContent=pwErr(e);});
+  });
+  var dzOpen=el('button',{type:'button',class:'btn danger',onclick:function(){dzBody.hidden=!dzBody.hidden;}},icon('trash',16),'Hapus akun saya');
+  dzBody.append(el('div',{class:'dzwarn'},'Semua paste, isi, statistik, dan profilmu akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.'),
+    el('div',{class:'stack',style:'margin-top:14px'},el('div',null,el('label',{for:'p-conf',text:'Ketik HAPUS untuk melanjutkan'}),conf),
+      syn?el('div',null,el('label',{for:'p-dpw',text:'Kata sandi saat ini'}),dpw):el('div',{class:'hint',text:'Kamu akan diminta memilih akun Google-mu sekali lagi untuk verifikasi.'}),
+      dErr,el('div',{class:'actions'},dBtn)));
+  var cardDz=el('section',{class:'card dz'},el('h2',null,el('span',{class:'hbadge'},icon('shield',17)),'Zona berbahaya'),
+    el('p',{class:'cdesc',text:'Menghapus akun akan menghapus seluruh tautan dan datanya dari Pastekan Linkmu.'}),el('div',{class:'actions'},dzOpen),dzBody);
+
+  main.replaceChildren(head,el('div',{class:'dash'},[cardId,cardPw,cardDz]));
+}
 function renderManage(){
   if(!S.acct)return needLogin('Kelola Tautan','kelola');
-  S.cur=null; loadStats();
+  S.cur=null; loadStats(false,'d');
   var q=el('input',{id:'m-q',class:'inp',type:'search',placeholder:'Cari judul atau alamat','aria-label':'Cari tautan',value:S.mq||null});
   q.addEventListener('input',function(){S.mq=q.value;updateManage();});
   var fs=[['all','Semua'],['active','Aktif'],['locked','Terkunci'],['expired','Kedaluwarsa']];
