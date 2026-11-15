@@ -1859,6 +1859,38 @@ function renderAdminPanel(){
       get:function(){return {img:img.value.trim(),data:dataUrl,href:href.value.trim(),code:code.value.trim(),h:Math.max(50,Math.min(600,Math.round(Number(h.value)||100)))};}};
   }
   var top=slotBox('top','Iklan atas (di bawah header)'), bot=slotBox('bottom','Iklan bawah (di atas footer)');
+
+  /* Pengaturan jumlah kunjungan per paste (khusus admin). */
+  var countSlug=el('input',{class:'inp',type:'text',placeholder:'Contoh: link-saya',autocomplete:'off',autocapitalize:'off',spellcheck:'false'});
+  var countValue=el('input',{class:'inp',type:'number',inputmode:'numeric',min:'0',step:'1',placeholder:'Contoh: 7500'});
+  var countErr=el('div',{class:'err',role:'alert'});
+  var countSave=el('button',{type:'button',class:'btn primary'},'Simpan jumlah dilihat');
+  countSave.addEventListener('click',function(){
+    countErr.textContent='';
+    var slug=countSlug.value.trim().toLowerCase();
+    var n=Number(countValue.value);
+    if(!validSlug(slug)){countErr.textContent='Masukkan slug paste yang valid.';return;}
+    if(countValue.value.trim()===''||!Number.isSafeInteger(n)||n<0){countErr.textContent='Jumlah harus berupa angka bulat 0 atau lebih.';return;}
+    countSave.disabled=true;
+    S.db.collection('pastes').doc(slug).get().then(function(ps){
+      if(!ps.exists)throw new Error('Paste dengan slug tersebut tidak ditemukan.');
+      var ownerId=ps.data().ownerId||'';
+      return S.db.collection('counts').doc(slug).set({
+        slug:slug,owner:ownerId,n:n,adminUpdatedAt:Date.now()
+      },{merge:true});
+    }).then(function(){
+      S.agg[slug]={total:n};
+      if(S.slug===slug){var vc=$('#vc');if(vc)vc.textContent=nf(n)+' dilihat';}
+      countErr.className='hint ok';
+      countErr.textContent='Berhasil disimpan. Kunjungan berikutnya akan dihitung mulai dari '+nf(n+1)+'.';
+      toast('Jumlah dilihat berhasil diperbarui');
+    }).catch(function(e){
+      countErr.className='err';
+      countErr.textContent=e&&e.code==='permission-denied'
+        ?'Ditolak oleh Firestore. Periksa Rules / pastikan akun ini terdaftar sebagai admin.'
+        :(e&&e.message?e.message:'Gagal menyimpan jumlah dilihat.');
+    }).then(function(){countSave.disabled=false;});
+  });
   var err=el('div',{class:'err',role:'alert'}), save=el('button',{type:'button',class:'btn primary lg'},'Simpan');
   save.addEventListener('click',function(){
     err.textContent='';
@@ -1878,6 +1910,14 @@ function renderAdminPanel(){
   $('#main').replaceChildren(el('section',{class:'card'},el('div',{class:'stack'},
     el('div',null,el('h1',{text:'Panel Admin',style:'margin:0 0 6px'}),el('span',{class:'chip info'},icon('shield',13),'@'+S.acct)),
     sw,top.node,bot.node,
+    el('div',{class:'adbox'},
+      el('h3',{text:'Atur jumlah dilihat'}),
+      el('p',{class:'cdesc',text:'Ubah angka kunjungan pada sebuah paste. Kunjungan berikutnya akan menambah angka dari nilai yang kamu tetapkan.'}),
+      el('div',null,el('label',{text:'Slug paste'}),countSlug),
+      el('div',null,el('label',{text:'Jumlah dilihat baru'}),countValue),
+      countErr,
+      el('div',{class:'actions'},countSave)
+    ),
     el('div',{class:'notice',text:'Banner gambar dan link paling pasti jalan. Kode iklan dari jaringan iklan dijalankan di kotak terisolasi, jadi sebagian jaringan iklan mungkin tidak menampilkannya.'}),
     err,el('div',{class:'actions'},save,el('button',{type:'button',class:'btn lg',onclick:function(){go('');}},'Lihat situs')))));
 }
