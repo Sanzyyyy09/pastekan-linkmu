@@ -383,12 +383,7 @@ label.chk input{width:18px;height:18px;accent-color:var(--accent)}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast,.btn,.faq summary svg{transition:none}.btn:hover{transform:none}}
 
-/* Pop-up iklan khusus halaman paste */
-.pl-popup-overlay{position:fixed;inset:0;z-index:10000;background:rgba(3,7,20,.78);display:flex;align-items:center;justify-content:center;padding:18px}
-.pl-popup-card{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 24px 80px #0009}
-.pl-popup-close{position:absolute;right:12px;top:12px;z-index:2;border:0;border-radius:50%;width:36px;height:36px;background:#10182c;color:#fff;font-size:24px;cursor:pointer}
-.pl-popup-card .adslot{margin:18px 0 0}.pl-popup-card .adslot img{max-height:65vh;object-fit:contain}
-
+.pl-popup-overlay{position:fixed;inset:0;z-index:9999;background:#000b;display:flex;align-items:center;justify-content:center;padding:18px}.pl-popup-card{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}.pl-popup-close{position:absolute;right:12px;top:12px;z-index:2;border:0;border-radius:50%;width:36px;height:36px;background:#10182c;color:#fff;font-size:24px}
 </style>
 </head>
 <body>
@@ -588,7 +583,7 @@ var ACCT_DOMAIN='@akun.pastekan.app';
 var S={db:null,auth:null,ready:false,noConfig:false,dbChecked:false,uid:null,acct:'',canWrite:true,admin:false,net:'connecting',
   pub:[],mine:[],metas:new Map(),listReady:false,agg:{},hits:new Map(),statsAt:0,tab:'recent',q:'',shown:30,
   slug:'',rendered:false,cur:null,editing:false,pwds:new Map(),viewed:{},flash:'',flashSlug:'',raw:false,
-  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adsAsked:false,adsReady:false,adKey:'',isAdmin:null,next:'',dr:'d',dn:30,prof:null,profFor:'',statsFrom:null,statsBusy:false,profDirty:false};
+  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adKey:'',isAdmin:null,next:'',dr:'d',dn:30,prof:null,profFor:'',statsFrom:null,statsBusy:false,profDirty:false};
 
 function isMine(m){return !!(m&&m.ownerId&&S.uid&&m.ownerId===S.uid);}
 function canManage(m){return isMine(m)&&!!S.acct;}
@@ -692,22 +687,10 @@ function refreshLive(){
 /* ---------- data (Firebase) ---------- */
 function metaFrom(snap){return Object.assign({},snap.data(),{slug:snap.id});}
 function openPaste(slug){
-  // Tunggu pengaturan iklan dimuat agar gerbang redirect tidak terlewat.
-  if(!S.adsReady){
-    S.cur={status:'loading'}; renderView();
-    if(!S.adsAsked)loadAds();
-    return;
-  }
-  var redirectUrl=httpsOnly(S.ads&&S.ads.redirectUrl), redirectOn=!!(S.ads&&S.ads.redirectOn);
-  var redirectKey='pastekan_redirect_done_v1', redirectDone=false;
-  try{redirectDone=sessionStorage.getItem(redirectKey)==='1';}catch(e){}
-  if(redirectOn&&redirectUrl&&!redirectDone){
-    var enter=el('button',{type:'button',class:'btn primary lg',onclick:function(){
-      try{sessionStorage.setItem(redirectKey,'1');}catch(e){}
-      location.href=redirectUrl;
-    }},'Masuk');
-    viewShell([el('div',{class:'vhead'},el('h1',{text:'Paste siap dibuka'})),el('p',{style:'color:var(--muted)',text:'Tekan Masuk untuk melanjutkan ke paste yang kamu tuju.'}),el('div',{class:'actions'},enter)],false);
-    return;
+  if(!S.adsReady){S.cur={status:'loading'};renderView();if(!S.adsAsked)loadAds();return;}
+  var rk='pk_redirect_done_v1',done=false;try{done=sessionStorage.getItem(rk)==='1';}catch(e){}
+  if(S.ads&&S.ads.redirectOn&&!done&&httpsOnly(S.ads.redirectUrl)){
+    viewShell([el('div',{class:'vhead'},el('h1',{text:'Paste siap dibuka'})),el('p',{style:'color:var(--muted)',text:'Tekan Masuk untuk melanjutkan ke paste yang kamu tuju.'}),el('button',{type:'button',class:'btn primary lg',text:'Masuk',onclick:function(){try{sessionStorage.setItem(rk,'1');}catch(e){}location.href=S.ads.redirectUrl;}})],false);return;
   }
   S.cur={status:'loading'}; renderView();
   if(!S.db){ if(S.dbChecked){S.cur={status:'offline'};renderView();} return; }
@@ -1520,23 +1503,16 @@ function viewShell(children,band){
 function stateCard(titleText,msg,extra){
   viewShell([el('div',{class:'vhead'},el('h1',{text:titleText})),el('p',{style:'color:var(--muted);margin:0 0 14px',text:msg}),extra||null]);
 }
-function showPastePopup(meta){
-  var cfg=S.ads&&S.ads.popup;
-  if(!S.ads||!S.ads.on||!cfg||!S.ads.popupOn)return;
-  var key='pastekan_popup_seen_v1';
-  try{if(sessionStorage.getItem(key)==='1')return;sessionStorage.setItem(key,'1');}catch(e){}
-  var ad=adNode(cfg); if(!ad)return;
-  var overlay=el('div',{class:'pl-popup-overlay',role:'dialog','aria-modal':'true','aria-label':'Iklan'});
-  function close(){overlay.remove();document.removeEventListener('keydown',onKey);}
-  function onKey(e){if(e.key==='Escape')close();}
-  var closeBtn=el('button',{type:'button',class:'pl-popup-close','aria-label':'Tutup iklan',text:'×',onclick:close});
-  var card=el('div',{class:'pl-popup-card'},closeBtn,el('div',{class:'adtag',text:'Iklan'}),ad);
-  overlay.append(card);
-  overlay.addEventListener('click',function(e){if(e.target===overlay)close();});
-  document.addEventListener('keydown',onKey);
-  document.body.append(overlay);
+function showPastePopup(){
+  var a=S.ads||{},p=a.popup||{};
+  if(!a.on||!a.popupOn||(!p.data&&!p.img&&!p.code))return;
+  var k='pk_popup_seen_v1';try{if(sessionStorage.getItem(k)==='1')return;sessionStorage.setItem(k,'1');}catch(e){}
+  var node=adNode(p);if(!node)return;
+  var ov=el('div',{class:'pl-popup-overlay',role:'dialog','aria-modal':'true'});
+  function close(){ov.remove();document.removeEventListener('keydown',key);} function key(e){if(e.key==='Escape')close();}
+  ov.append(el('div',{class:'pl-popup-card'},el('button',{type:'button',class:'pl-popup-close',text:'×',onclick:close}),el('div',{class:'adtag',text:'Iklan'}),node));
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});document.addEventListener('keydown',key);document.body.append(ov);
 }
-
 function renderView(){
   var cur=S.cur; if(!cur)return;
   var st=cur.status;
@@ -1623,7 +1599,7 @@ function renderView(){
   }},icon('more',16),'Lainnya');
   shortbox.append(moreBtn);
   viewShell([el('div',{class:'vband'},head,chips),el('div',{class:'vbody'},banner,shortbox,menu,el('div',{class:'sep'}),content)],true);
-  if(st==='ok'&&!S.editing)showPastePopup(meta);
+  if(st==='ok'&&!S.editing)showPastePopup();
 }
 
 /* ---------- akun (Firebase Authentication) ---------- */
@@ -1795,13 +1771,7 @@ function renderAds(){
 }
 function loadAds(){
   if(!S.db||S.adsAsked)return; S.adsAsked=true;
-  S.db.collection('settings').doc('ads').get().then(function(s){
-    S.ads=s.exists?s.data():null;S.adsReady=true;S.adKey='#';renderAds();
-    if(kindOf(S.slug)==='paste')openPaste(S.slug);
-  }).catch(function(){
-    S.adsReady=true;S.ads=null;
-    if(kindOf(S.slug)==='paste')openPaste(S.slug);
-  });
+  S.db.collection('settings').doc('ads').get().then(function(s){S.ads=s.exists?s.data():null;S.adsReady=true;S.adKey='#';renderAds();if(kindOf(S.slug)==='paste')openPaste(S.slug);}).catch(function(){S.ads=null;S.adsReady=true;if(kindOf(S.slug)==='paste')openPaste(S.slug);});
 }
 
 /* ---------- admin ---------- */
@@ -1906,26 +1876,31 @@ function renderAdminPanel(){
       el('div',null,el('div',{class:'hint',text:'Pratinjau'}),prev)),
       get:function(){return {img:img.value.trim(),data:dataUrl,href:href.value.trim(),code:code.value.trim(),h:Math.max(50,Math.min(600,Math.round(Number(h.value)||100)))};}};
   }
-  var top=slotBox('top','Iklan atas (di bawah header)'), bot=slotBox('bottom','Iklan bawah (di atas footer)'), popup=slotBox('popup','Pop-up Ads (satu iklan untuk semua halaman paste)');
-  var popupOn=!!cfg.popupOn;
-  var popupSwitch=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(popupOn)},el('span',{text:'Aktifkan Pop-up Ads di halaman paste'}),el('span',{class:'knob'}));
-  popupSwitch.addEventListener('click',function(){popupOn=!popupOn;popupSwitch.setAttribute('aria-checked',String(popupOn));});
-  var redirectOn=!!cfg.redirectOn;
-  var redirectSwitch=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(redirectOn)},el('span',{text:'Aktifkan Redirect Ads (1x per sesi)'}),el('span',{class:'knob'}));
-  redirectSwitch.addEventListener('click',function(){redirectOn=!redirectOn;redirectSwitch.setAttribute('aria-checked',String(redirectOn));});
+  var top=slotBox('top','Iklan atas (di bawah header)'), bot=slotBox('bottom','Iklan bawah (di atas footer)'), popup=slotBox('popup','Pop-up Ads (satu gambar untuk semua paste)');
+  var popupOn=!!cfg.popupOn, redirectOn=!!cfg.redirectOn;
   var redirectUrl=el('input',{class:'inp',type:'url',inputmode:'url',placeholder:'https://tujuan-iklan.com',value:cfg.redirectUrl||''});
+  function toggle(label,initial){var v=initial,b=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(v)},el('span',{text:label}),el('span',{class:'knob'}));b.addEventListener('click',function(){v=!v;b.setAttribute('aria-checked',String(v));});return {node:b,get:function(){return v;}};}
+  var popSwitch=toggle('Aktifkan Pop-up Ads di halaman paste',popupOn), redSwitch=toggle('Aktifkan Redirect Ads saat tombol Masuk ditekan',redirectOn);
+  var countSlug=el('input',{class:'inp',type:'text',placeholder:'Slug paste, contoh: 9y7pmd',autocomplete:'off'});
+  var countValue=el('input',{class:'inp',type:'number',min:'0',step:'1',inputmode:'numeric',placeholder:'Jumlah dilihat baru'});
+  var countStatus=el('div',{class:'hint'});
+  var countLoad=el('button',{type:'button',class:'btn',text:'Muat jumlah saat ini',onclick:function(){var slug=countSlug.value.trim();if(!slug){countStatus.textContent='Isi slug paste dulu.';return;}S.db.collection('counts').doc(slug).get().then(function(d){countValue.value=d.exists?(Number(d.data().n)||0):0;countStatus.textContent=d.exists?'Jumlah saat ini berhasil dimuat.':'Belum ada hitungan; nilai awal 0.';}).catch(function(){countStatus.textContent='Gagal membaca jumlah. Periksa slug dan Rules.';});}});
+  var countSave=el('button',{type:'button',class:'btn primary',text:'Simpan jumlah dilihat',onclick:function(){var slug=countSlug.value.trim(),n=Number(countValue.value);if(!slug||!Number.isSafeInteger(n)||n<0){countStatus.textContent='Slug wajib diisi dan jumlah harus bilangan bulat 0 atau lebih.';return;}S.db.collection('pastes').doc(slug).get().then(function(paste){if(!paste.exists)throw new Error('notfound');return S.db.collection('counts').doc(slug).get().then(function(c){var owner=paste.data().ownerId,ref=S.db.collection('counts').doc(slug),data={slug:slug,owner:owner,n:n,adminUpdatedAt:Date.now()};return c.exists?ref.set(data):ref.set(data);});}).then(function(){if(S.agg[slug])S.agg[slug].total=n;countStatus.textContent='Berhasil. Kunjungan berikutnya akan menambah angka dari '+nf(n)+' menjadi '+nf(n+1)+'.';if(S.slug===slug)loadCount(slug);}).catch(function(e){countStatus.textContent=e.message==='notfound'?'Slug paste tidak ditemukan.':'Gagal menyimpan. Periksa Rules dan akses admin.';});}});
+  var countBox=el('div',{class:'adbox'},el('h3',{text:'Edit Jumlah Dilihat'}),el('p',{class:'hint',text:'Atur angka dasar per slug. Contoh 7500; setelah satu kunjungan baru, jumlah menjadi 7501.'}),el('label',{text:'Slug paste'}),countSlug,countLoad,el('label',{text:'Jumlah dilihat'}),countValue,countSave,countStatus);
   var err=el('div',{class:'err',role:'alert'}), save=el('button',{type:'button',class:'btn primary lg'},'Simpan');
   save.addEventListener('click',function(){
     err.textContent='';
-    var data={on:on,top:top.get(),bottom:bot.get(),popup:popup.get(),popupOn:popupOn,redirectOn:redirectOn,redirectUrl:redirectUrl.value.trim(),updatedAt:Date.now()}, bad='';
+    var data={on:on,top:top.get(),bottom:bot.get(),popup:popup.get(),popupOn:popSwitch.get(),redirectOn:redSwitch.get(),redirectUrl:redirectUrl.value.trim(),updatedAt:Date.now()}, bad='';
     [['top','atas'],['bottom','bawah']].forEach(function(p){var s=data[p[0]];
       if(s.img&&!httpsOnly(s.img))bad='Alamat gambar iklan '+p[1]+' harus diawali https://';
       if(s.href&&!httpsOnly(s.href))bad='Link tujuan iklan '+p[1]+' harus diawali https://';
       if(s.code.length>6000)bad='Kode iklan '+p[1]+' terlalu panjang (maksimal 6000 karakter).';});
     if(data.redirectUrl&&!httpsOnly(data.redirectUrl))bad='URL Redirect Ads harus diawali https://';
-    if(data.redirectOn&&!httpsOnly(data.redirectUrl))bad='Isi URL tujuan Redirect Ads dengan alamat https:// yang valid.';
-    if(data.popup.enabled&&!(data.popup.data||httpsOnly(data.popup.img)||data.popup.code))bad='Pilih gambar atau isi sumber iklan Pop-up terlebih dahulu.';
+    if(data.redirectOn&&!httpsOnly(data.redirectUrl))bad='Isi URL tujuan Redirect Ads yang valid.';
     if(data.popup.href&&!httpsOnly(data.popup.href))bad='Link tujuan Pop-up harus diawali https://';
+    if(data.popup.img&&!httpsOnly(data.popup.img))bad='URL gambar Pop-up harus diawali https://';
+    if(data.popup.code.length>6000)bad='Kode iklan Pop-up terlalu panjang.';
+    if(data.popupOn&&!data.popup.data&&!data.popup.img&&!data.popup.code)bad='Pilih gambar Pop-up dari galeri atau isi sumber iklan.';
     if(bad){err.textContent=bad;return;}
     save.disabled=true;
     S.db.collection('settings').doc('ads').set(data).then(function(){
@@ -1937,18 +1912,12 @@ function renderAdminPanel(){
   $('#main').replaceChildren(el('section',{class:'card'},el('div',{class:'stack'},
     el('div',null,el('h1',{text:'Panel Admin',style:'margin:0 0 6px'}),el('span',{class:'chip info'},icon('shield',13),'@'+S.acct)),
     sw,top.node,bot.node,
-    el('div',{class:'adbox'},el('h3',{text:'Redirect Ads'}),redirectSwitch,el('label',{text:'URL tujuan iklan'}),redirectUrl,el('p',{class:'hint',text:'Pengunjung diarahkan saat menekan Masuk. Setelah itu kembali sendiri dengan tombol Back. Maksimal satu kali per sesi.'})),
-    el('div',{class:'adbox'},el('h3',{text:'Pop-up Ads'}),popupSwitch,el('p',{class:'hint',text:'Satu iklan untuk semua link. Hanya tampil setelah halaman paste berhasil dibuka, bukan di beranda/menu awal.'}),popup.node),
+    el('div',{class:'adbox'},el('h3',{text:'Redirect Ads'}),redSwitch.node,el('label',{text:'URL tujuan redirect'}),redirectUrl,el('p',{class:'hint',text:'Muncul saat pengunjung menekan Masuk. Pengunjung kembali dengan tombol Back. Satu kali per sesi.'})),
+    el('div',{class:'adbox'},el('h3',{text:'Pop-up Ads'}),popSwitch.node,el('p',{class:'hint',text:'Satu iklan untuk semua paste. Hanya tampil di halaman paste yang sedang dibuka, bukan menu awal.'}),popup.node),
+    countBox,
     el('div',{class:'notice',text:'Banner gambar dan link paling pasti jalan. Kode iklan dari jaringan iklan dijalankan di kotak terisolasi, jadi sebagian jaringan iklan mungkin tidak menampilkannya.'}),
     err,el('div',{class:'actions'},save,el('button',{type:'button',class:'btn lg',onclick:function(){go('');}},'Lihat situs')))));
 }
-
-// Saat pengunjung kembali dari halaman iklan dengan tombol Back, lanjutkan paste otomatis.
-window.addEventListener('pageshow',function(){
-  try{
-    if(kindOf(S.slug)==='paste'&&sessionStorage.getItem('pastekan_redirect_done_v1')==='1')openPaste(S.slug);
-  }catch(e){}
-});
 
 /* ---------- mulai ---------- */
 function initFirebase(){
@@ -1967,6 +1936,7 @@ function boot(){
   try{var t=localStorage.getItem('pl-theme'); if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}
   renderHeader(); renderFooter();
   window.addEventListener('hashchange',function(){navTo(readSlug());});
+  window.addEventListener('pageshow',function(){try{if(kindOf(S.slug)==='paste'&&sessionStorage.getItem('pk_redirect_done_v1')==='1')openPaste(S.slug);}catch(e){}});
   navTo(readSlug(),true);
   initFirebase();
 }
