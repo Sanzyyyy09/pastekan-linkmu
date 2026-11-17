@@ -583,7 +583,7 @@ var ACCT_DOMAIN='@akun.pastekan.app';
 var S={db:null,auth:null,ready:false,noConfig:false,dbChecked:false,uid:null,acct:'',canWrite:true,admin:false,net:'connecting',
   pub:[],mine:[],metas:new Map(),listReady:false,agg:{},hits:new Map(),statsAt:0,tab:'recent',q:'',shown:30,
   slug:'',rendered:false,cur:null,editing:false,pwds:new Map(),viewed:{},flash:'',flashSlug:'',raw:false,
-  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adKey:'',isAdmin:null,next:'',dr:'d',dn:30,prof:null,profFor:'',statsFrom:null,statsBusy:false,profDirty:false};
+  menu:false,authMode:'login',mq:'',mf:'all',wantEdit:'',more:false,ads:null,adsHome:null,adKey:'',isAdmin:null,next:'',dr:'d',dn:30,prof:null,profFor:'',statsFrom:null,statsBusy:false,profDirty:false};
 
 function isMine(m){return !!(m&&m.ownerId&&S.uid&&m.ownerId===S.uid);}
 function canManage(m){return isMine(m)&&!!S.acct;}
@@ -1022,8 +1022,8 @@ function renderHome(){
     el('div',{class:'faq'},FAQ.map(function(f){return el('details',null,el('summary',null,el('span',{text:f[0]}),icon('chev',18)),el('p',{text:f[1]}));})));
   var cta=el('section',{class:'cta'},el('h2',{text:'Siap membagikan teks dan tautanmu?'}),el('p',{text:'Buat paste pertamamu sekarang. Tidak perlu akun.'}),
     el('div',{class:'actions center'},el('button',{type:'button',class:'btn light lg',onclick:function(){go('buat');}},'Buat Paste Sekarang'),el('button',{type:'button',class:'btn lg',style:'background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)',onclick:function(){S.authMode='register';go('masuk');}},'Daftar Akun')));
-  $('#main').replaceChildren(hero,el('div',{class:'cols'},composer,rail),steps,feats,faq,cta);
-  renderRail();
+  $('#main').replaceChildren(el('div',{class:'adwrap home-adwrap',id:'home-adtop-wrap'},el('div',{class:'w',id:'home-adtop'})),hero,el('div',{class:'cols'},composer,rail),steps,feats,faq,cta,el('div',{class:'adwrap bot home-adwrap',id:'home-adbot-wrap'},el('div',{class:'w',id:'home-adbot'})));
+  renderRail(); renderAds(); if(S.adsHome)showHomePopup();
 }
 function renderRail(){
   var list=$('#list'); if(!list)return;
@@ -1768,10 +1768,32 @@ function renderAds(){
       host.parentNode.hidden=!n;
     });
   }
+  var homeOn=!!(S.adsHome&&S.adsHome.on)&&S.slug==='';
+  [['top','#home-adtop','#home-adtop-wrap'],['bottom','#home-adbot','#home-adbot-wrap']].forEach(function(p){
+    var host=$(p[1]),wrap=$(p[2]);if(!host||!wrap)return;
+    var n=homeOn?adNode(S.adsHome[p[0]]):null;host.replaceChildren();if(n)host.append(n);wrap.hidden=!n;
+  });
+}
+function showHomePopup(){
+  var a=S.adsHome||{},p=a.popup||{};
+  if(S.slug!==''||!a.on||!a.popupOn||(!p.data&&!p.img&&!p.code))return;
+  var k='pk_home_popup_seen_v1';try{if(sessionStorage.getItem(k)==='1')return;sessionStorage.setItem(k,'1');}catch(e){}
+  var node=adNode(p);if(!node)return;
+  var ov=el('div',{class:'pl-popup-overlay',role:'dialog','aria-modal':'true'});
+  function close(){ov.remove();document.removeEventListener('keydown',key);} function key(e){if(e.key==='Escape')close();}
+  ov.append(el('div',{class:'pl-popup-card'},el('button',{type:'button',class:'pl-popup-close',text:'×',onclick:close}),el('div',{class:'adtag',text:'Iklan'}),node));
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});document.addEventListener('keydown',key);document.body.append(ov);
 }
 function loadAds(){
   if(!S.db||S.adsAsked)return; S.adsAsked=true;
-  S.db.collection('settings').doc('ads').get().then(function(s){S.ads=s.exists?s.data():null;S.adsReady=true;S.adKey='#';renderAds();if(kindOf(S.slug)==='paste')openPaste(S.slug);}).catch(function(){S.ads=null;S.adsReady=true;if(kindOf(S.slug)==='paste')openPaste(S.slug);});
+  Promise.all([
+    S.db.collection('settings').doc('ads').get().then(function(x){return x.exists?x.data():null;}).catch(function(){return null;}),
+    S.db.collection('settings').doc('ads_home').get().then(function(x){return x.exists?x.data():null;}).catch(function(){return null;})
+  ]).then(function(r){
+    S.ads=r[0];S.adsHome=r[1];S.adsReady=true;S.adKey='#';renderAds();
+    if(kindOf(S.slug)==='paste')openPaste(S.slug);else if(S.slug===''){renderAds();showHomePopup();}
+    if(S.slug==='admin'&&S.isAdmin===true)renderAdminPanel();
+  }).catch(function(){S.adsReady=true;renderAds();if(kindOf(S.slug)==='paste')openPaste(S.slug);});
 }
 
 /* ---------- admin ---------- */
@@ -1834,6 +1856,31 @@ function renderAdmin(){
   }
   renderAdminPanel();
 }
+function buildHomeAdsAdmin(){
+  var cfg=S.adsHome||{},on=!!cfg.on;
+  var sw=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(on)},el('span',{text:'Tampilkan iklan di halaman Beranda'}),el('span',{class:'knob'}));
+  sw.addEventListener('click',function(){on=!on;sw.setAttribute('aria-checked',String(on));});
+  function slot(key,title){
+    var d=cfg[key]||{},img=el('input',{class:'inp',type:'url',placeholder:'https://…/banner.jpg',value:d.img||''}),href=el('input',{class:'inp',type:'url',placeholder:'https://tujuan-iklan.com',value:d.href||''});
+    var dataUrl=/^data:image\//.test(String(d.data||''))?d.data:'',pick=el('input',{type:'file',accept:'image/*',style:'display:none'}),pickBtn=el('button',{type:'button',class:'btn'},icon('plus',16),'Pilih dari galeri'),clr=el('button',{type:'button',class:'btn sm danger'},icon('trash',15),'Hapus gambar');
+    var code=el('textarea',{class:'inp',style:'min-height:90px',placeholder:'Kode iklan HTML (opsional)'});code.value=d.code||'';
+    var h=el('input',{class:'inp',type:'number',min:'50',max:'600',value:String(d.h||100)}),prev=el('div',{class:'adprev'});
+    function paint(){var n=adNode({img:img.value,data:dataUrl,href:href.value,code:code.value,h:h.value});prev.replaceChildren();if(n)prev.append(n);}
+    pickBtn.addEventListener('click',function(){pick.click();});pick.addEventListener('change',function(){var f=pick.files&&pick.files[0];if(!f)return;pickBtn.disabled=true;shrinkImage(f).then(function(u){dataUrl=u;img.value='';clr.hidden=false;paint();toast('Gambar berhasil dikompres. Tekan Simpan Iklan Beranda.');}).catch(function(){toast('Gambar gagal diproses.');}).then(function(){pickBtn.disabled=false;pick.value='';});});
+    clr.hidden=!dataUrl;clr.addEventListener('click',function(){dataUrl='';clr.hidden=true;paint();});img.addEventListener('input',function(){if(img.value){dataUrl='';clr.hidden=true;}paint();});[href,code,h].forEach(function(x){x.addEventListener('input',paint);});paint();
+    return {node:el('div',{class:'adbox'},el('h3',{text:title}),el('label',{text:'Gambar dari galeri HP'}),el('div',{class:'actions'},pickBtn,clr),pick,el('label',{text:'Atau alamat gambar HTTPS'}),img,el('label',{text:'Link tujuan iklan HTTPS'}),href,el('label',{text:'Kode iklan (opsional)'}),code,el('label',{text:'Tinggi kode iklan (50–600 px)'}),h,el('div',{class:'hint',text:'Pratinjau'}),prev),get:function(){return {img:img.value.trim(),data:dataUrl,href:href.value.trim(),code:code.value.trim(),h:Math.max(50,Math.min(600,Math.round(Number(h.value)||100)))};}};
+  }
+  var top=slot('top','Banner Atas Beranda'),bottom=slot('bottom','Banner Bawah Beranda'),popup=slot('popup','Pop-up Beranda');
+  var pop=!!cfg.popupOn,popSw=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(pop)},el('span',{text:'Aktifkan Pop-up khusus Beranda'}),el('span',{class:'knob'}));popSw.addEventListener('click',function(){pop=!pop;popSw.setAttribute('aria-checked',String(pop));});
+  var err=el('div',{class:'err',role:'alert'}),save=el('button',{type:'button',class:'btn primary',text:'Simpan Iklan Beranda'});
+  save.addEventListener('click',function(){err.textContent='';var data={on:on,top:top.get(),bottom:bottom.get(),popup:popup.get(),popupOn:pop,updatedAt:Date.now()},bad='';
+    ['top','bottom','popup'].forEach(function(k){var x=data[k],label=k==='top'?'Banner atas':k==='bottom'?'Banner bawah':'Pop-up';if(x.img&&!httpsOnly(x.img))bad=label+' harus memakai URL HTTPS.';if(x.href&&!httpsOnly(x.href))bad='Link tujuan '+label+' harus memakai HTTPS.';if(x.code.length>6000)bad='Kode '+label+' terlalu panjang (maksimal 6000 karakter).';});
+    if(data.popupOn&&!data.popup.data&&!data.popup.img&&!data.popup.code)bad='Isi gambar atau kode Pop-up Beranda terlebih dahulu.';if(bad){err.textContent=bad;return;}
+    save.disabled=true;S.db.collection('settings').doc('ads_home').set(data).then(function(){S.adsHome=data;save.disabled=false;renderAds();if(S.slug==='')showHomePopup();toast('Iklan Beranda berhasil disimpan.');}).catch(function(){save.disabled=false;err.textContent='Gagal menyimpan iklan Beranda. Periksa Firestore Rules dan akses admin.';});
+  });
+  return el('div',{class:'adbox'},el('h2',{text:'Iklan Halaman Beranda'}),el('p',{class:'hint',text:'Pengaturan ini TERPISAH dari iklan halaman Paste. Perubahan di sini tidak mengubah iklan Paste.'}),sw,top.node,bottom.node,el('div',{class:'adbox'},popSw.node,popup.node),err,save);
+}
+
 function renderAdminPanel(){
   var cfg=S.ads||{}, on=!!cfg.on;
   var sw=el('button',{type:'button',role:'switch',class:'sw','aria-checked':String(on)},el('span',{text:'Tampilkan iklan di situs'}),el('span',{class:'knob'}));
@@ -1914,6 +1961,7 @@ function renderAdminPanel(){
     sw,top.node,bot.node,
     el('div',{class:'adbox'},el('h3',{text:'Redirect Ads'}),redSwitch.node,el('label',{text:'URL tujuan redirect'}),redirectUrl,el('p',{class:'hint',text:'Muncul saat pengunjung menekan Masuk. Pengunjung kembali dengan tombol Back. Satu kali per sesi.'})),
     el('div',{class:'adbox'},el('h3',{text:'Pop-up Ads'}),popSwitch.node,el('p',{class:'hint',text:'Satu iklan untuk semua paste. Hanya tampil di halaman paste yang sedang dibuka, bukan menu awal.'}),popup.node),
+    buildHomeAdsAdmin(),
     countBox,
     el('div',{class:'notice',text:'Banner gambar dan link paling pasti jalan. Kode iklan dari jaringan iklan dijalankan di kotak terisolasi, jadi sebagian jaringan iklan mungkin tidak menampilkannya.'}),
     err,el('div',{class:'actions'},save,el('button',{type:'button',class:'btn lg',onclick:function(){go('');}},'Lihat situs')))));
