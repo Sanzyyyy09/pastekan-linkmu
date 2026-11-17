@@ -690,7 +690,12 @@ function openPaste(slug){
   if(!S.adsReady){S.cur={status:'loading'};renderView();if(!S.adsAsked)loadAds();return;}
   var rk='pk_redirect_done_v1',done=false;try{done=sessionStorage.getItem(rk)==='1';}catch(e){}
   if(S.ads&&S.ads.redirectOn&&!done&&httpsOnly(S.ads.redirectUrl)){
-    viewShell([el('div',{class:'vhead'},el('h1',{text:'Paste siap dibuka'})),el('p',{style:'color:var(--muted)',text:'Tekan Masuk untuk melanjutkan ke paste yang kamu tuju.'}),el('button',{type:'button',class:'btn primary lg',text:'Masuk',onclick:function(){try{sessionStorage.setItem(rk,'1');}catch(e){}location.href=S.ads.redirectUrl;}})],false);return;
+    viewShell([el('div',{class:'vhead'},el('h1',{text:'Paste siap dibuka'})),el('p',{style:'color:var(--muted)',text:'Tekan Masuk untuk membuka iklan di tab baru. Paste tujuan tetap terbuka di halaman ini.'}),el('button',{type:'button',class:'btn primary lg',text:'Masuk',onclick:function(){
+      var adUrl=httpsOnly(S.ads&&S.ads.redirectUrl);
+      try{sessionStorage.setItem(rk,'1');}catch(e){}
+      if(adUrl){try{window.open(adUrl,'_blank','noopener,noreferrer');}catch(e){}}
+      openPaste(slug);
+    }} )],false);return;
   }
   S.cur={status:'loading'}; renderView();
   if(!S.db){ if(S.dbChecked){S.cur={status:'offline'};renderView();} return; }
